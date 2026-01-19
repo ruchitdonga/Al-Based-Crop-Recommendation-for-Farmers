@@ -10,7 +10,7 @@ Agriculture is the backbone of the economy, but traditional farming often relies
 
 By analyzing specific parameters—such as soil nutrients (N, P, K), pH levels, and local climate data—the system predicts the most suitable crop to plant. This data-driven approach aims to maximize yield, reduce resource wastage, and increase profitability for farmers.
 
----
+
 
 ## 🔍 How It Works
 The system uses Machine Learning algorithms to classify the suitability of 22 different crops based on 7 key environmental features.
@@ -31,7 +31,7 @@ The model predicts the optimal crop from a list including:
 * *Legumes:* Chickpea, Kidney Beans, Lentil, Moth Beans, Mung Bean, Blackgram, Pigeon Peas
 * *Others:* Coconut, Coffee, Cotton, Jute
 
----
+
 
 ## ⚙️ Algorithms & Models
 We experimented with several classification algorithms to find the best fit:
@@ -40,7 +40,7 @@ We experimented with several classification algorithms to find the best fit:
 * **Random Forest (Best Performer):** Used in the final application for its high accuracy and resistance to overfitting.
 * **AdaBoost / XGBoost:** Tested for boosting performance.
 
----
+
 
 ## 🛠️ Technology Stack
 * **Backend:** Python
@@ -48,12 +48,12 @@ We experimented with several classification algorithms to find the best fit:
 * **Visualization:** Matplotlib, Seaborn
 * **Web Framework (Optional):** Flask or Streamlit (for the user interface)
 
----
+
 
 ## 📊 Dataset
 The dataset used for training is available on Kaggle (Crop Recommendation Dataset). It consists of **2200 rows** of data, with 100 entries for each of the 22 crops, ensuring a balanced dataset.
 
----
+
 
 ## 🚀 How to Run Locally
 
