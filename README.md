@@ -59,5 +59,5 @@ The dataset used for training is available on Kaggle (Crop Recommendation Datase
 
 ### 1. Clone the Repo
 ```bash
-git clone [https://github.com/your-username/crop-recommendation.git](https://github.com/your-username/crop-recommendation.git)
-cd crop-recommendation
+git clone https://github.com/ruchitdonga/Al-Based-Crop-Recommendation-for-Farmers.git
+cd Al-Based-Crop-Recommendation-for-Farmers
