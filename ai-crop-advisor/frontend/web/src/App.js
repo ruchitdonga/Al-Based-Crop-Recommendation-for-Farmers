@@ -1,9 +1,14 @@
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import CropForm from "./pages/CropForm";
+
 function App() {
   return (
-    <div>
-      <h1>AI-Based Crop Recommendation System</h1>
-      <p>Frontend setup completed.</p>
-    </div>
+    <>
+      <Navbar />
+      <Home />
+      <CropForm />
+    </>
   );
 }
 
