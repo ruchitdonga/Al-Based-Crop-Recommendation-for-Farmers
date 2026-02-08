@@ -18,3 +18,22 @@ staticfiles/
 Thumbs.db
 .idea/
 .idea/
+
+
+# =====================
+# ML / Data artifacts
+# =====================
+
+# Trained models
+artifacts/
+*.pkl
+*.joblib
+
+# Datasets
+*.csv
+*.xlsx
+*.xls
+
+# Experiments / temp
+runs/
+outputs/
