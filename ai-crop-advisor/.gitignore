@@ -1,0 +1,39 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env.*
+*.log
+
+# Django
+*.sqlite3
+db.sqlite3
+staticfiles/
+
+# OS files
+.DS_Store
+Thumbs.db
+.idea/
+.idea/
+
+
+# =====================
+# ML / Data artifacts
+# =====================
+
+# Trained models
+artifacts/
+*.pkl
+*.joblib
+
+# Datasets
+*.csv
+*.xlsx
+*.xls
+
+# Experiments / temp
+runs/
+outputs/
