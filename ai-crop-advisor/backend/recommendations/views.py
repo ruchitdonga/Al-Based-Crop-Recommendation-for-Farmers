@@ -69,7 +69,7 @@ class RecommendView(APIView):
                 "yield": result["ml"]["prediction"]["yield"],
                 "profit": result["ml"]["prediction"]["profit"],
             },
-            "explanation": None,
+            "explanation": result["explanation"],
             "source": result["source"]
         })
 
