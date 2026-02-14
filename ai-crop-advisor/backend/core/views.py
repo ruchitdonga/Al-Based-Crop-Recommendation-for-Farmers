@@ -1,13 +1,23 @@
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.utils.timezone import now
+from datetime import datetime
 
-@api_view(['GET'])
-def health_check(request):
-    return Response({
-        "status": "ok",
-        "timestamp": now()
-    })
+from services.system_check import SystemCheck
+
+
+class HealthCheckView(APIView):
+
+    def get(self, request):
+
+        checker = SystemCheck()
+        services = checker.run_all()
+
+        overall_status = "ok"
+        if "error" in services.values():
+            overall_status = "degraded"
+
+        return Response({
+            "status": overall_status,
+            "timestamp": datetime.utcnow(),
+            "services": services,
+        })

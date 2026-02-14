@@ -25,7 +25,11 @@ def decide_crop(data: dict) -> dict:
 
     # ML client (stub for now)
     ml_client = MLClient()
-    ml_result = ml_client.predict(data)
+    ml_result = ml_client.predict({
+    "soil": {"ph": soil_ph},
+    "last_crop": last_crop,
+    })
+
 
     return {
         "crop": crop,

@@ -1,46 +1,39 @@
 """
-ML CLIENT LAYER
+ML Client
 
-Purpose:
-- Acts as interface between backend and ML engine
-- Backend NEVER talks directly to ML code
-- ML can change without breaking API
+Handles interaction with ML prediction system.
 """
+
+from services.feature_mapper import FeatureMapper
 
 
 class MLClient:
-    """
-    Handles communication with ML recommendation model.
-    """
 
     def __init__(self):
-        # future: load model or API connection
-        pass
+        self.mapper = FeatureMapper()
 
-    def predict(self, input_data: dict) -> dict:
+    def predict(self, api_input: dict) -> dict:
         """
-        Expected ML input:
-        {
-            "soil_ph": float,
-            "last_crop": str
-        }
-
-        Expected ML output:
-        {
-            "crop": str,
-            "yield": float,
-            "profit": float,
-            "confidence": float
-        }
+        Convert API input → ML features → prediction.
         """
 
-        # TEMPORARY PLACEHOLDER
-        # ML integration will happen later
+        # Build ML feature vector
+        features = self.mapper.build_feature_vector(api_input)
+
+        # -----------------------------
+        # TEMP ML PREDICTION (STUB)
+        # -----------------------------
+        # Later ML engineer replaces this block.
+
+        prediction = {
+            "crop": "PredictedCrop",
+            "yield": 3.5,
+            "profit": 12000,
+            "confidence": 0.82,
+        }
 
         return {
-            "crop": None,
-            "yield": None,
-            "profit": None,
-            "confidence": None,
-            "source": "ml_stub"
+            "prediction": prediction,
+            "features_used": features,
+            "source": "ml_stub",
         }

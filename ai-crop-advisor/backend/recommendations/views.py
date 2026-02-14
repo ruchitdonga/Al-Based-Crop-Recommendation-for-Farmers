@@ -66,9 +66,10 @@ class RecommendView(APIView):
         return Response({
             "recommendation": {
                 "crop": result["crop"],
-                "yield": None,
-                "profit": None,
+                "yield": result["ml"]["prediction"]["yield"],
+                "profit": result["ml"]["prediction"]["profit"],
             },
             "explanation": None,
             "source": result["source"]
         })
+
