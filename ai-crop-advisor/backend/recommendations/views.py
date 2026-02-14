@@ -30,20 +30,45 @@ Notes:
 - null values are expected in early versions
 """
 
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
-@api_view(['POST'])
-def recommend(request):
-    """
-    Stub implementation.
-    Returns hardcoded data matching the API contract.
-    """
-    return Response({
-        "recommendation": {
-            "crop": "Wheat",
-            "yield": None,
-            "profit": None
-        },
-        "explanation": None
-    })
+from .serializers import RecommendRequestSerializer
+from services.decision_engine import decide_crop
+
+class RecommendView(APIView):
+
+    @extend_schema(
+        request=RecommendRequestSerializer,
+        responses={200: dict},
+    )
+    def post(self, request):
+        """
+        Recommendation endpoint using rule-based decision engine.
+        """
+
+        data = request.data
+
+        # Extract inputs safely
+        soil = data.get("soil", {})
+        soil_ph = soil.get("ph")
+
+        last_crop = data.get("last_crop")
+
+        decision_input = {
+            "soil_ph": soil_ph,
+            "last_crop": last_crop,
+        }
+
+        result = decide_crop(decision_input)
+
+        return Response({
+            "recommendation": {
+                "crop": result["crop"],
+                "yield": None,
+                "profit": None,
+            },
+            "explanation": None,
+            "source": result["source"]
+        })
