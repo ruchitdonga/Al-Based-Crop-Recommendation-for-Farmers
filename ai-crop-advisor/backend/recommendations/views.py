@@ -1,75 +1,71 @@
 """
 API CONTRACT: Crop Recommendation
-
-Endpoint:
-POST /api/recommend/
-
-Request Body:
-{
-  "location": "Pune",
-  "soil": {
-    "ph": 6.5
-  },
-  "last_crop": "Rice",
-  "lang": "hi"
-}
-
-Response Body:
-{
-  "recommendation": {
-    "crop": "Wheat",
-    "yield": null,
-    "profit": null
-  },
-  "explanation": null
-}
-
-Notes:
-- yield and profit will be added later via ML
-- explanation will be generated later via LLM
-- null values are expected in early versions
 """
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from drf_spectacular.utils import extend_schema
 
 from .serializers import RecommendRequestSerializer
 from services.decision_engine import decide_crop
+from services.explanation_service import ExplanationService
+
 
 class RecommendView(APIView):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.explanation_service = ExplanationService()
 
     @extend_schema(
         request=RecommendRequestSerializer,
         responses={200: dict},
     )
     def post(self, request):
-        """
-        Recommendation endpoint using rule-based decision engine.
-        """
 
-        data = request.data
+        # STEP 1 — Validate request
+        serializer = RecommendRequestSerializer(data=request.data)
 
-        # Extract inputs safely
-        soil = data.get("soil", {})
-        soil_ph = soil.get("ph")
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # STEP 2 — Extract validated data
+        data = serializer.validated_data
+
+        soil = data["soil"]
+        climate = data["climate"]
         last_crop = data.get("last_crop")
+        lang = data.get("lang", "en")
 
+        # STEP 3 — Decision Engine (FULL FEATURE INPUT)
         decision_input = {
-            "soil_ph": soil_ph,
+            "soil": soil,
+            "climate": climate,
             "last_crop": last_crop,
         }
 
         result = decide_crop(decision_input)
 
+        crop = result.get("crop")
+        source = result.get("source")
+
+        # STEP 4 — Explanation (No yield/profit anymore)
+        explanation = self.explanation_service.generate(
+            crop=crop,
+            soil_ph=soil["ph"],  # explanation still references pH
+            last_crop=last_crop,
+            lang=lang
+        )
+
+        # STEP 5 — Final Response
         return Response({
             "recommendation": {
-                "crop": result["crop"],
-                "yield": result["ml"]["prediction"]["yield"],
-                "profit": result["ml"]["prediction"]["profit"],
+                "crop": crop,
             },
-            "explanation": result["explanation"],
-            "source": result["source"]
+            "explanation": explanation,
+            "source": source,
         })
-

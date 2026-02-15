@@ -1,61 +1,48 @@
 """
-Decision Engine (Rule-Based v1)
+Decision Engine
 
-Rules decide crop first.
-ML client is called for future enhancement.
+ML-first architecture.
+Rules used only as fallback safety.
 """
 
 from services.ml_client import MLClient
-from services.explanation_service import ExplanationService
 
 
 def decide_crop(data: dict) -> dict:
-    """
-    Decide crop using rules, then enrich with ML + explanation.
-    """
 
     soil_ph = data.get("soil_ph")
     last_crop = data.get("last_crop")
 
-    # ---------------------------
-    # RULE 1 — soil pH suitability
-    # ---------------------------
-    if soil_ph is not None and soil_ph >= 6.0:
-        crop = "Wheat"
-    else:
-        crop = "Millet"
-
-    # ---------------------------
-    # RULE 2 — avoid repeating crop
-    # ---------------------------
-    if last_crop and last_crop.lower() == crop.lower():
-        crop = "Pulses"
-
-    # ---------------------------
-    # ML client (stub for now)
-    # ---------------------------
     ml_client = MLClient()
-    ml_result = ml_client.predict({
-        "soil": {"ph": soil_ph},
-        "last_crop": last_crop,
-    })
 
-    # ---------------------------
-    # Explanation generation
-    # ---------------------------
-    explainer = ExplanationService()
-    explanation = explainer.generate(
-        crop=crop,
-        soil_ph=soil_ph,
-        last_crop=last_crop,
-    )
+    try:
+        ml_result = ml_client.predict({
+            "soil": data.get("soil"),
+            "climate": data.get("climate"),
+            "last_crop": data.get("last_crop"),
+        })
 
-    # ---------------------------
-    # Final response
-    # ---------------------------
-    return {
-        "crop": crop,
-        "source": "rules",
-        "ml": ml_result,
-        "explanation": explanation,
-    }
+        predicted_crop = ml_result["prediction"]["crop"]
+
+        if not predicted_crop:
+            raise ValueError("ML returned empty crop")
+
+        return {
+            "crop": predicted_crop,
+            "source": ml_result["source"],
+            "ml": ml_result,
+        }
+
+    except Exception as e:
+        # Fallback rule logic (safety only)
+        if soil_ph is not None and soil_ph >= 6.0:
+            fallback_crop = "Wheat"
+        else:
+            fallback_crop = "Millet"
+
+        return {
+            "crop": fallback_crop,
+            "source": "rule_fallback",
+            "ml": None,
+            "error": str(e),
+        }

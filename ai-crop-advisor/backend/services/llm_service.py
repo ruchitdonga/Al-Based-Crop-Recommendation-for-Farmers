@@ -1,9 +1,3 @@
-"""
-LLM Service
-
-Connects backend to local Ollama LLM.
-"""
-
 import requests
 
 
@@ -11,26 +5,24 @@ class LLMService:
 
     def __init__(self):
         self.url = "http://localhost:11434/api/generate"
-        self.model = "phi3"
+        self.model = "llama3.1"
 
-    def generate_explanation(self, prompt: str) -> str:
-        """
-        Send prompt to local LLM using Ollama.
-        """
+    def reason_multilingual(self, prompt: str) -> str:
 
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,
-        }
+        response = requests.post(
+            self.url,
+            headers={"Content-Type": "application/json"},
+            json={
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+            },
+            timeout=120,
+        )
 
-        try:
-            response = requests.post(self.url, json=payload, timeout=30)
-            response.raise_for_status()
+        if response.status_code != 200:
+            raise Exception(
+                f"Ollama error {response.status_code}: {response.text}"
+            )
 
-            data = response.json()
-            return data.get("response", "").strip()
-
-        except Exception:
-            # fallback if LLM not running
-            return "[LLM unavailable] Explanation service offline."
+        return response.json()["response"].strip()
