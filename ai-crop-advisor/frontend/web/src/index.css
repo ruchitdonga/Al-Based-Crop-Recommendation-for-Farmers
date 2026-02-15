@@ -2,9 +2,34 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-0: #040b07;
+  --bg-1: #06100a;
+  --bg-2: #07120b;
+
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(235, 255, 242, 0.82);
+
+  --glass: rgba(255, 255, 255, 0.10);
+  --glass-strong: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  --green: rgba(34, 197, 94, 1);
+  --teal: rgba(16, 185, 129, 1);
+  --gold: rgba(245, 158, 11, 1);
+
+  --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.42);
+  --shadow-md: 0 16px 34px rgba(0, 0, 0, 0.28);
+}
+
 html,
 body {
   height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -14,30 +39,71 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  color: rgba(255, 255, 255, 0.92);
-  background: radial-gradient(1200px 600px at 15% 10%, rgba(34, 197, 94, 0.20), rgba(0, 0, 0, 0)),
-    radial-gradient(900px 500px at 85% 5%, rgba(16, 185, 129, 0.16), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #07120b 0%, #06100a 35%, #040b07 100%);
+  color: var(--text);
+  line-height: 1.5;
+  background:
+    radial-gradient(1200px 650px at 12% 8%, rgba(34, 197, 94, 0.22), rgba(0, 0, 0, 0)),
+    radial-gradient(900px 520px at 86% 6%, rgba(16, 185, 129, 0.16), rgba(0, 0, 0, 0)),
+    radial-gradient(900px 520px at 55% 90%, rgba(245, 158, 11, 0.06), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 38%, var(--bg-0) 100%);
 }
 
 #root {
   min-height: 100%;
 }
 
+.statusBanner {
+  width: min(1120px, 94vw);
+  margin: 10px auto -6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  color: rgba(255, 240, 217, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 a {
   color: inherit;
+}
+
+::selection {
+  background: rgba(34, 197, 94, 0.28);
 }
 
 /* Shared UI primitives */
 .glassCard {
   width: min(820px, 92vw);
-  padding: 34px;
+  padding: 36px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.40);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+.glassCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 240px at 18% 0%, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0)),
+    radial-gradient(700px 220px at 92% 8%, rgba(245, 158, 11, 0.07), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.glassCard > * {
+  position: relative;
+}
+
+.glassCard--hero {
+  width: min(920px, 92vw);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .badge {
@@ -46,8 +112,8 @@ a {
   align-items: center;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.11);
+  border: 1px solid rgba(34, 197, 94, 0.24);
   color: rgba(214, 255, 230, 0.95);
   font-weight: 650;
   font-size: 13px;
@@ -67,8 +133,14 @@ a {
   text-decoration: none;
   font-weight: 700;
   letter-spacing: 0.2px;
-  transition: box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  transition: box-shadow 220ms ease, border-color 220ms ease, background 220ms ease, transform 220ms ease,
+    opacity 220ms ease;
   user-select: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
 }
 
 .btn__arrow {
@@ -77,12 +149,14 @@ a {
 
 .btn--primary {
   color: rgba(7, 18, 11, 0.98);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.96), rgba(16, 185, 129, 0.92));
-  box-shadow: 0 18px 35px rgba(34, 197, 94, 0.18);
+  background:
+    linear-gradient(135deg, rgba(34, 197, 94, 0.98), rgba(16, 185, 129, 0.92));
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 18px 42px rgba(34, 197, 94, 0.18), 0 10px 24px rgba(0, 0, 0, 0.24);
 }
 
 .btn--primary:hover {
-  box-shadow: 0 24px 52px rgba(34, 197, 94, 0.24);
+  box-shadow: 0 26px 56px rgba(34, 197, 94, 0.22), 0 14px 28px rgba(0, 0, 0, 0.26);
 }
 
 .btn--ghost {
@@ -96,6 +170,11 @@ a {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 .btn--full {
   width: 100%;
 }
@@ -104,6 +183,8 @@ a {
 .home {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 
@@ -113,23 +194,35 @@ a {
   background-image: url("./assets/background.png");
   background-size: cover;
   background-position: center;
-  filter: saturate(1.05) contrast(1.05);
+  filter: saturate(1.08) contrast(1.06);
   transform: scale(1.03);
 }
 
 .home__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(4, 11, 7, 0.78) 0%, rgba(4, 11, 7, 0.70) 40%, rgba(4, 11, 7, 0.84) 100%),
-    radial-gradient(700px 500px at 18% 18%, rgba(34, 197, 94, 0.14), rgba(0, 0, 0, 0));
+  background:
+    linear-gradient(180deg, rgba(4, 11, 7, 0.80) 0%, rgba(4, 11, 7, 0.68) 40%, rgba(4, 11, 7, 0.86) 100%),
+    radial-gradient(760px 520px at 18% 18%, rgba(34, 197, 94, 0.16), rgba(0, 0, 0, 0)),
+    radial-gradient(860px 560px at 76% 10%, rgba(16, 185, 129, 0.14), rgba(0, 0, 0, 0)),
+    radial-gradient(820px 540px at 52% 90%, rgba(245, 158, 11, 0.05), rgba(0, 0, 0, 0));
 }
 
 .home__content {
   position: relative;
-  padding: 96px 18px 56px;
+  padding: calc(112px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+    64px calc(18px + env(safe-area-inset-left));
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
+}
+
+.home__container {
+  width: min(1120px, 94vw);
+  display: grid;
+  justify-items: center;
   gap: 26px;
 }
 
@@ -138,13 +231,23 @@ a {
   font-size: clamp(34px, 4.6vw, 56px);
   line-height: 1.06;
   letter-spacing: -0.8px;
+  text-wrap: balance;
+}
+
+@supports (-webkit-background-clip: text) {
+  .heroTitle {
+    background: linear-gradient(90deg, rgba(245, 255, 249, 0.98), rgba(214, 255, 230, 0.96), rgba(34, 197, 94, 0.92), rgba(245, 158, 11, 0.72));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 .heroSubtitle {
   margin: 12px 0 0;
   font-size: clamp(15px, 1.55vw, 18px);
   line-height: 1.55;
-  color: rgba(235, 255, 242, 0.88);
+  color: rgba(235, 255, 242, 0.86);
   max-width: 62ch;
 }
 
@@ -168,18 +271,39 @@ a {
 .miniCard {
   padding: 16px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.miniCard h3 {
+.miniCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px 180px at 10% 0%, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.miniCard:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.32);
+}
+
+.miniCard__title {
+  position: relative;
   margin: 0 0 6px;
   font-size: 16px;
+  letter-spacing: -0.2px;
 }
 
-.miniCard p {
+.miniCard__text {
+  position: relative;
   margin: 0;
   color: rgba(235, 255, 242, 0.80);
   font-size: 14px;
@@ -190,6 +314,8 @@ a {
 .formPage {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 
@@ -214,8 +340,11 @@ a {
   position: relative;
   width: min(860px, 92vw);
   margin: 0 auto;
-  padding: 96px 18px 56px;
+  padding: calc(96px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+    56px calc(18px + env(safe-area-inset-left));
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: grid;
   align-content: start;
 }
@@ -223,11 +352,12 @@ a {
 .formCard > div {
   padding: 28px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.40);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .formTitle {
@@ -263,20 +393,32 @@ a {
   padding: 12px 12px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.22);
   color: rgba(255, 255, 255, 0.92);
   outline: none;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition: border-color 220ms ease, box-shadow 220ms ease, background 220ms ease, transform 220ms ease;
+}
+
+.field__input:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.26);
 }
 
 .field__input::placeholder {
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.46);
+  opacity: 1;
 }
 
-.field__input:focus {
-  border-color: rgba(34, 197, 94, 0.45);
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
-  background: rgba(0, 0, 0, 0.22);
+.field__input:focus,
+.field__input:focus-visible {
+  border-color: rgba(34, 197, 94, 0.50);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16), 0 10px 26px rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.30);
+}
+
+.field__input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .formActions {
@@ -305,6 +447,21 @@ a {
   font-weight: 800;
 }
 
+.resultMeta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: rgba(235, 255, 242, 0.78);
+  font-size: 13px;
+}
+
+.resultExplanation {
+  margin-top: 10px;
+  color: rgba(235, 255, 242, 0.86);
+  line-height: 1.5;
+}
+
 @media (max-width: 760px) {
   .miniGrid {
     grid-template-columns: 1fr;
@@ -317,6 +474,24 @@ a {
   }
   .formCard {
     padding-top: 86px;
+  }
+  .home__content {
+    padding-top: 96px;
+  }
+}
+
+@media (max-width: 520px) {
+  .heroActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroActions .btn {
+    width: 100%;
+  }
+
+  .field__input {
+    font-size: 16px;
   }
 }
 

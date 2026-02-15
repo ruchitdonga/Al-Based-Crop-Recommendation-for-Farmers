@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { motion } from "framer-motion";
 
 import "../Navbar.css";
 
@@ -15,11 +14,8 @@ function Navbar() {
   }, []);
 
   return (
-    <motion.nav
+    <nav
       className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
     >
       <div className="navbar__inner">
         <NavLink to="/" className="navbar__brand" aria-label="CropAdvisor home">
@@ -43,7 +39,7 @@ function Navbar() {
           </NavLink>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }
 

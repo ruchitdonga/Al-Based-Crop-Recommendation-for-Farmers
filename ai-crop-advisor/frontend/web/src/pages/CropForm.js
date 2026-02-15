@@ -1,60 +1,130 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { apiPost } from "../api";
 
 function CropForm() {
+  // Stores all form fields in a single object.
   const [formData, setFormData] = useState({
-    nitrogen: "",
-    phosphorus: "",
-    potassium: "",
-    temperature: "",
-    humidity: "",
+    location: "",
     ph: "",
-    rainfall: "",
+    last_crop: "",
   });
 
-  const [result, setResult] = useState("");
+  // UI state for submit lifecycle.
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+
+  // Keep a ref to the active timeout so we can clean up on unmount.
+  const loadingTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+    };
+  }, []);
 
   const fields = useMemo(
     () => [
-      { name: "nitrogen", label: "Nitrogen (N)", placeholder: "e.g. 60", type: "number" },
-      { name: "phosphorus", label: "Phosphorus (P)", placeholder: "e.g. 45", type: "number" },
-      { name: "potassium", label: "Potassium (K)", placeholder: "e.g. 55", type: "number" },
-      { name: "temperature", label: "Temperature (°C)", placeholder: "e.g. 26", type: "number" },
-      { name: "humidity", label: "Humidity (%)", placeholder: "e.g. 70", type: "number" },
-      { name: "ph", label: "Soil pH", placeholder: "e.g. 6.5", type: "number", step: "0.1" },
-      { name: "rainfall", label: "Rainfall (mm)", placeholder: "e.g. 110", type: "number" },
+      { name: "location", label: "Location", placeholder: "e.g. Pune", type: "text" },
+      { name: "ph", label: "Soil pH", placeholder: "e.g. 6.8", type: "number", step: "0.1" },
+      { name: "last_crop", label: "Last crop", placeholder: "e.g. Rice", type: "text" },
     ],
     []
   );
 
+  // Generic change handler for all inputs.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Basic validation: if pH is provided, it must be a valid number.
+  const validate = () => {
+    const phRaw = String(formData.ph).trim();
+    if (phRaw === "") return { ok: true, message: "" };
+
+    const phVal = Number(phRaw);
+    if (!Number.isFinite(phVal)) {
+      return { ok: false, message: "Please enter a valid number for Soil pH." };
+    }
+
+    return { ok: true, message: "" };
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const n = Number(formData.nitrogen);
-    if (!Number.isFinite(n)) {
-      setResult("");
+    // Prevent double submits while loading.
+    if (isLoading) return;
+
+    const validation = validate();
+    if (!validation.ok) {
+      setError(validation.message);
+      setResult(null);
       return;
     }
 
-    setResult(n > 50 ? "Rice" : "Wheat");
+    setError("");
+    setResult(null);
+    setIsLoading(true);
+
+    // API call: POST /api/recommend/
+    loadingTimerRef.current = setTimeout(async () => {
+      try {
+        const payload = {};
+
+        const location = String(formData.location).trim();
+        if (location) payload.location = location;
+
+        const lastCrop = String(formData.last_crop).trim();
+        if (lastCrop) payload.last_crop = lastCrop;
+
+        const phRaw = String(formData.ph).trim();
+        if (phRaw) {
+          payload.soil = { ph: Number(phRaw) };
+        }
+
+        payload.lang = "en";
+
+        const res = await apiPost("/recommend/", payload);
+        if (!res.ok) {
+          setError("Backend unavailable");
+          setResult(null);
+          return;
+        }
+
+        setResult(res.data ?? null);
+      } catch {
+        setError("Backend unavailable");
+        setResult(null);
+      } finally {
+        setIsLoading(false);
+        loadingTimerRef.current = null;
+      }
+    }, 0);
   };
 
-  const container = {
+  const content = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { when: "beforeChildren", staggerChildren: 0.07 },
+      transition: { when: "beforeChildren", staggerChildren: 0.1, delayChildren: 0.05 },
     },
   };
 
-  const item = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  const fadeUp = {
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+  };
+
+  const formStagger = {
+    hidden: {},
+    show: {
+      transition: { when: "beforeChildren", staggerChildren: 0.075, delayChildren: 0.14 },
+    },
   };
 
   return (
@@ -64,21 +134,27 @@ function CropForm() {
 
       <motion.div
         className="formCard"
-        initial={{ opacity: 0, y: 28 }}
+        initial={{ opacity: 0, y: 26 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.65, ease: "easeOut" }}
       >
-        <motion.div variants={container} initial="hidden" animate="show">
-          <motion.h2 className="formTitle" variants={item}>
+        <motion.div variants={content} initial="hidden" animate="show">
+          <motion.h2 className="formTitle" variants={fadeUp}>
             Crop Recommendation
           </motion.h2>
-          <motion.p className="formSubtitle" variants={item}>
+          <motion.p className="formSubtitle" variants={fadeUp}>
             Fill in your soil and climate values.
           </motion.p>
 
-          <motion.form className="formGrid" onSubmit={handleSubmit} variants={container}>
+          <motion.form
+            className="formGrid"
+            onSubmit={handleSubmit}
+            variants={formStagger}
+            initial="hidden"
+            animate="show"
+          >
             {fields.map((f) => (
-              <motion.label key={f.name} className="field" variants={item}>
+              <motion.label key={f.name} className="field" variants={fadeUp}>
                 <span className="field__label">{f.label}</span>
                 <input
                   className="field__input"
@@ -89,33 +165,67 @@ function CropForm() {
                   placeholder={f.placeholder}
                   onChange={handleChange}
                   inputMode="decimal"
+                  disabled={isLoading}
                 />
               </motion.label>
             ))}
 
-            <motion.div className="formActions" variants={item}>
+            <motion.div className="formActions" variants={fadeUp}>
               <motion.button
                 type="submit"
                 className="btn btn--primary btn--full"
-                whileHover={{ scale: 1.03 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 26px 56px rgba(34, 197, 94, 0.22), 0 14px 28px rgba(0, 0, 0, 0.26)" }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+                disabled={isLoading}
+                aria-busy={isLoading}
               >
-                Predict Crop
+                {isLoading ? "Requesting…" : "Get Recommendation"}
                 <span className="btn__arrow">→</span>
               </motion.button>
             </motion.div>
           </motion.form>
 
-          {result && (
+          {error && (
+            <motion.p
+              className="formSubtitle"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              role="alert"
+              aria-live="polite"
+              style={{ color: "rgba(255, 214, 214, 0.92)" }}
+            >
+              {error}
+            </motion.p>
+          )}
+
+          {result?.recommendation?.crop && (
             <motion.div
               className="resultBox"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
-              <span className="resultBox__label">Recommended Crop</span>
-              <span className="resultBox__value">{result}</span>
+              <div>
+                <span className="resultBox__label">Recommended Crop</span>
+                <div className="resultBox__value">{result.recommendation.crop}</div>
+
+                {(result.recommendation.yield !== undefined || result.recommendation.profit !== undefined) && (
+                  <div className="resultMeta">
+                    <span>Yield: {result.recommendation.yield ?? "—"}</span>
+                    <span>Profit: {result.recommendation.profit ?? "—"}</span>
+                  </div>
+                )}
+
+                {result.source && <div className="resultMeta">Source: {result.source}</div>}
+
+                {result.explanation && (
+                  <div className="resultExplanation">
+                    {result.explanation}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </motion.div>
