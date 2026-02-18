@@ -1,65 +1,54 @@
 import joblib
 from pathlib import Path
-from typing import Dict, List
+import pandas as pd
 
-from ml_engine.models.crop_suitability import CropSuitabilityModel
-
-# Path to trained artifacts (runtime only, gitignored)
 ARTIFACTS_DIR = Path("artifacts")
-CROP_MODEL_PATH = ARTIFACTS_DIR / "crop_suitability.pkl"
+PIPELINE_PATH = ARTIFACTS_DIR / "crop_pipeline.pkl"
 
 
 class DecisionEngine:
     def __init__(self):
-        self.crop_model: CropSuitabilityModel | None = None
+        self.pipeline = None
+        self.encoder = None
+        self.features = None
+        self.model_version = None
 
-    def load_models(self) -> None:
-        if not CROP_MODEL_PATH.exists():
-            raise FileNotFoundError(
-                "Crop suitability model not found. "
-                "Run the trainer before inference."
-            )
+    def load_models(self):
+        artifact = joblib.load(PIPELINE_PATH)
 
-        self.crop_model = joblib.load(CROP_MODEL_PATH)
+        self.pipeline = artifact["pipeline"]
+        self.encoder = artifact["label_encoder"]
+        self.features = artifact["features"]
+        self.model_version = artifact["model_version"]
 
-        if not isinstance(self.crop_model, CropSuitabilityModel):
-            raise RuntimeError(
-                "Invalid model artifact format. "
-                "Expected CropSuitabilityModel."
-            )
+    def recommend(self, input_data: dict):
+        df = pd.DataFrame([input_data])[self.features]
 
-    def recommend_crops(
-        self,
-        soil_weather_input: Dict,
-        top_k: int = 3
-    ) -> List[Dict]:
-        if self.crop_model is None:
-            raise RuntimeError("Models not loaded. Call load_models() first.")
+        probs = self.pipeline.predict_proba(df)[0]
+        pred_class = probs.argmax()
 
-        predictions = self.crop_model.predict_top_k(
-            soil_weather_input,
-            k=top_k
-        )
+        crop = self.encoder.inverse_transform([pred_class])[0]
+        confidence = float(probs[pred_class])
 
-        return [
-            {"crop": crop, "confidence": round(float(score), 4)}
-            for crop, score in predictions
-        ]
+        return {
+            "crop": crop,
+            "confidence": round(confidence, 4),
+            "model_version": self.model_version
+        }
 
 
-# Local sanity test (never used in production)
 if __name__ == "__main__":
     engine = DecisionEngine()
     engine.load_models()
 
-    sample_input = {
-        "N": 80,
-        "P": 40,
-        "K": 50,
-        "temperature": 28,
-        "humidity": 75,
+    sample = {
+        "N": 80.0,
+        "P": 40.0,
+        "K": 50.0,
+        "temperature": 28.0,
+        "humidity": 75.0,
         "ph": 6.8,
-        "rainfall": 200
+        "rainfall": 200.0
     }
 
-    print(engine.recommend_crops(sample_input))
+    print(engine.recommend(sample))
