@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function Home() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const page = {
     hidden: { opacity: 0 },
@@ -51,16 +53,15 @@ function Home() {
             transition={{ duration: 0.28, ease: "easeOut" }}
           >
             <motion.p className="badge" variants={fadeUp}>
-              AI-powered • Weather-aware • Soil-smart
+              {t("home.badge")}
             </motion.p>
 
             <motion.h1 className="heroTitle" variants={fadeUp}>
-              Grow smarter with AI crop recommendations.
+              {t("home.title")}
             </motion.h1>
 
             <motion.p className="heroSubtitle" variants={fadeUp}>
-              Enter your soil and climate details and get a crop suggestion optimized for yield and
-              sustainability.
+              {t("home.subtitle")}
             </motion.p>
 
             <motion.div className="heroActions" variants={fadeUp}>
@@ -71,7 +72,7 @@ function Home() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
-                Get Recommendation
+                {t("home.cta")}
                 <span className="btn__arrow">→</span>
               </motion.button>
 
@@ -82,7 +83,7 @@ function Home() {
                 whileTap={{ scale: 0.99 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
-                How it works
+                {t("home.howItWorks")}
               </motion.a>
             </motion.div>
           </motion.div>
@@ -102,8 +103,8 @@ function Home() {
                 whileHover={{ y: -2, scale: 1.02, boxShadow: "0 22px 52px rgba(0, 0, 0, 0.34)" }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
-                <h3 className="miniCard__title">Soil nutrients</h3>
-                <p className="miniCard__text">N, P, K, pH and rainfall inputs.</p>
+                <h3 className="miniCard__title">{t("home.card1.title")}</h3>
+                <p className="miniCard__text">{t("home.card1.text")}</p>
               </motion.div>
               <motion.div
                 className="miniCard"
@@ -111,8 +112,8 @@ function Home() {
                 whileHover={{ y: -2, scale: 1.02, boxShadow: "0 22px 52px rgba(0, 0, 0, 0.34)" }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
-                <h3 className="miniCard__title">Climate signals</h3>
-                <p className="miniCard__text">Temperature and humidity trends.</p>
+                <h3 className="miniCard__title">{t("home.card2.title")}</h3>
+                <p className="miniCard__text">{t("home.card2.text")}</p>
               </motion.div>
               <motion.div
                 className="miniCard"
@@ -120,8 +121,8 @@ function Home() {
                 whileHover={{ y: -2, scale: 1.02, boxShadow: "0 22px 52px rgba(0, 0, 0, 0.34)" }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
-                <h3 className="miniCard__title">Actionable output</h3>
-                <p className="miniCard__text">A clear crop recommendation.</p>
+                <h3 className="miniCard__title">{t("home.card3.title")}</h3>
+                <p className="miniCard__text">{t("home.card3.text")}</p>
               </motion.div>
             </motion.div>
           </motion.div>

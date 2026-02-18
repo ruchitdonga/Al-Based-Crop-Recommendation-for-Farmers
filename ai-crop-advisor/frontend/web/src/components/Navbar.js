@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import "../Navbar.css";
+import { useLanguage } from "../i18n/LanguageContext";
+import { LANGS } from "../i18n/translations";
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { lang, setLang, t } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);
@@ -17,6 +20,15 @@ function Navbar() {
     <nav
       className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`}
     >
+      <div className="navbar__marquee" aria-label="Site banner">
+        <div className="navbar__marqueeTrack" aria-hidden="true">
+          <span className="navbar__marqueeText">
+            <span className="navbar__growPlant" aria-hidden="true">🌱</span>
+            Aura farmed by Krish Niyush Ruchit
+          </span>
+        </div>
+      </div>
+
       <div className="navbar__inner">
         <NavLink to="/" className="navbar__brand" aria-label="CropAdvisor home">
           <span className="navbar__brandIcon">🌿</span>
@@ -29,14 +41,28 @@ function Navbar() {
             end
             className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
           >
-            Home
+            {t("nav.home")}
           </NavLink>
           <NavLink
             to="/predict"
             className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
           >
-            Crop Advisor
+            {t("nav.cropAdvisor")}
           </NavLink>
+
+          <label className="langPicker" aria-label={t("nav.language")}>
+            <select
+              className="langPicker__select"
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+            >
+              {LANGS.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
     </nav>

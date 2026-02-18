@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, "") ?? "http://127.0.0.1:8000/api";
+  process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, "") ?? "/api";
 
 async function parseJsonSafe(response) {
   const text = await response.text();

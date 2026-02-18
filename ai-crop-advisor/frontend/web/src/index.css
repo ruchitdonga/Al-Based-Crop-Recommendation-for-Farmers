@@ -72,6 +72,57 @@ a {
   background: rgba(34, 197, 94, 0.28);
 }
 
+/* Decorative truck animation */
+.truckAnim {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+.truckAnim__track {
+  position: relative;
+  width: 100%;
+  height: 28px;
+}
+
+.truckAnim__truck {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  font-size: 20px;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  animation: truckDriveRoundTrip 12s linear infinite;
+  will-change: transform;
+}
+
+@keyframes truckDriveRoundTrip {
+  0% {
+    transform: translateX(-24vw) scaleX(-1);
+  }
+  47% {
+    transform: translateX(124vw) scaleX(-1);
+  }
+  50% {
+    transform: translateX(124vw) scaleX(1);
+  }
+  97% {
+    transform: translateX(-24vw) scaleX(1);
+  }
+  100% {
+    transform: translateX(-24vw) scaleX(-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .truckAnim__truck {
+    animation: none;
+  }
+}
+
 /* Shared UI primitives */
 .glassCard {
   width: min(820px, 92vw);
@@ -397,6 +448,70 @@ a {
   color: rgba(255, 255, 255, 0.92);
   outline: none;
   transition: border-color 220ms ease, box-shadow 220ms ease, background 220ms ease, transform 220ms ease;
+}
+
+.field__inputWrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.field__input--number {
+  padding-right: 46px;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.field__input--number::-webkit-outer-spin-button,
+.field__input--number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.field__stepper {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 4px;
+}
+
+.field__stepBtn {
+  width: 28px;
+  height: 18px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 900;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.field__stepBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.20);
+  transform: translateY(-1px);
+}
+
+.field__stepBtn:active {
+  transform: translateY(0px);
+}
+
+.field__stepBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.44);
+}
+
+.field__stepBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .field__input:hover {

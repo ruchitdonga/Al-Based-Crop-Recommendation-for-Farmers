@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { apiPost } from "../api";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function CropForm() {
+  const { lang, t } = useLanguage();
   // Stores all form fields in a single object.
   const [formData, setFormData] = useState({
-    location: "",
+    N: "",
+    P: "",
+    K: "",
+    temperature: "",
+    humidity: "",
+    rainfall: "",
     ph: "",
     last_crop: "",
   });
@@ -28,11 +35,16 @@ function CropForm() {
 
   const fields = useMemo(
     () => [
-      { name: "location", label: "Location", placeholder: "e.g. Pune", type: "text" },
-      { name: "ph", label: "Soil pH", placeholder: "e.g. 6.8", type: "number", step: "0.1" },
-      { name: "last_crop", label: "Last crop", placeholder: "e.g. Rice", type: "text" },
+      { name: "N", label: t("field.N"), placeholder: t("placeholder.num"), type: "number" },
+      { name: "P", label: t("field.P"), placeholder: t("placeholder.num"), type: "number" },
+      { name: "K", label: t("field.K"), placeholder: t("placeholder.num"), type: "number" },
+      { name: "temperature", label: t("field.temperature"), placeholder: t("placeholder.temp"), type: "number" },
+      { name: "humidity", label: t("field.humidity"), placeholder: t("placeholder.humidity"), type: "number" },
+      { name: "rainfall", label: t("field.rainfall"), placeholder: t("placeholder.rainfall"), type: "number" },
+      { name: "ph", label: t("field.ph"), placeholder: t("placeholder.ph"), type: "number", step: "0.1" },
+      { name: "last_crop", label: t("field.last_crop"), placeholder: t("placeholder.last_crop"), type: "text" },
     ],
-    []
+    [t]
   );
 
   // Generic change handler for all inputs.
@@ -41,14 +53,57 @@ function CropForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Basic validation: if pH is provided, it must be a valid number.
-  const validate = () => {
-    const phRaw = String(formData.ph).trim();
-    if (phRaw === "") return { ok: true, message: "" };
+  const getStep = (field) => {
+    const stepRaw = field?.step ?? 1;
+    const stepNum = Number(stepRaw);
+    return Number.isFinite(stepNum) && stepNum > 0 ? stepNum : 1;
+  };
 
-    const phVal = Number(phRaw);
-    if (!Number.isFinite(phVal)) {
-      return { ok: false, message: "Please enter a valid number for Soil pH." };
+  const getDecimals = (field) => {
+    const stepRaw = field?.step ?? 1;
+    const text = String(stepRaw);
+    const idx = text.indexOf(".");
+    return idx >= 0 ? Math.max(0, text.length - idx - 1) : 0;
+  };
+
+  const stepNumberField = (field, direction) => {
+    const step = getStep(field);
+    const decimals = getDecimals(field);
+    const factor = 10 ** decimals;
+
+    setFormData((prev) => {
+      const raw = String(prev[field.name] ?? "").trim();
+      const current = Number(raw);
+
+      if (!Number.isFinite(current)) {
+        const nextInit = direction > 0 ? step : 0;
+        return {
+          ...prev,
+          [field.name]: decimals > 0 ? nextInit.toFixed(decimals) : String(nextInit),
+        };
+      }
+
+      const next = (Math.round(current * factor) + Math.round(step * factor) * direction) / factor;
+      return {
+        ...prev,
+        [field.name]: decimals > 0 ? next.toFixed(decimals) : String(next),
+      };
+    });
+  };
+
+  // Validation: backend requires full soil/climate numeric input.
+  const validate = () => {
+    const requiredNumeric = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph"];
+
+    for (const key of requiredNumeric) {
+      const raw = String(formData[key]).trim();
+      if (raw === "") {
+        return { ok: false, message: t("form.validation.required") };
+      }
+      const num = Number(raw);
+      if (!Number.isFinite(num)) {
+        return { ok: false, message: t("form.validation.number") };
+      }
     }
 
     return { ok: true, message: "" };
@@ -74,31 +129,38 @@ function CropForm() {
     // API call: POST /api/recommend/
     loadingTimerRef.current = setTimeout(async () => {
       try {
-        const payload = {};
-
-        const location = String(formData.location).trim();
-        if (location) payload.location = location;
+        const payload = {
+          soil: {
+            N: Number(String(formData.N).trim()),
+            P: Number(String(formData.P).trim()),
+            K: Number(String(formData.K).trim()),
+            ph: Number(String(formData.ph).trim()),
+          },
+          climate: {
+            temperature: Number(String(formData.temperature).trim()),
+            humidity: Number(String(formData.humidity).trim()),
+            rainfall: Number(String(formData.rainfall).trim()),
+          },
+          lang,
+        };
 
         const lastCrop = String(formData.last_crop).trim();
         if (lastCrop) payload.last_crop = lastCrop;
 
-        const phRaw = String(formData.ph).trim();
-        if (phRaw) {
-          payload.soil = { ph: Number(phRaw) };
-        }
-
-        payload.lang = "en";
-
         const res = await apiPost("/recommend/", payload);
         if (!res.ok) {
-          setError("Backend unavailable");
+          if (res.status === 400 && res.data) {
+            setError(t("form.error.invalid"));
+          } else {
+            setError(t("form.error.backend"));
+          }
           setResult(null);
           return;
         }
 
         setResult(res.data ?? null);
       } catch {
-        setError("Backend unavailable");
+        setError(t("form.error.backend"));
         setResult(null);
       } finally {
         setIsLoading(false);
@@ -140,10 +202,10 @@ function CropForm() {
       >
         <motion.div variants={content} initial="hidden" animate="show">
           <motion.h2 className="formTitle" variants={fadeUp}>
-            Crop Recommendation
+            {t("form.title")}
           </motion.h2>
           <motion.p className="formSubtitle" variants={fadeUp}>
-            Fill in your soil and climate values.
+            {t("form.subtitle")}
           </motion.p>
 
           <motion.form
@@ -156,17 +218,51 @@ function CropForm() {
             {fields.map((f) => (
               <motion.label key={f.name} className="field" variants={fadeUp}>
                 <span className="field__label">{f.label}</span>
-                <input
-                  className="field__input"
-                  name={f.name}
-                  type={f.type}
-                  step={f.step}
-                  value={formData[f.name]}
-                  placeholder={f.placeholder}
-                  onChange={handleChange}
-                  inputMode="decimal"
-                  disabled={isLoading}
-                />
+                {f.type === "number" ? (
+                  <div className="field__inputWrap">
+                    <input
+                      className="field__input field__input--number"
+                      name={f.name}
+                      type="number"
+                      step={f.step}
+                      value={formData[f.name]}
+                      placeholder={f.placeholder}
+                      onChange={handleChange}
+                      inputMode="decimal"
+                      disabled={isLoading}
+                    />
+                    <div className="field__stepper" aria-hidden={isLoading ? "true" : "false"}>
+                      <button
+                        type="button"
+                        className="field__stepBtn"
+                        onClick={() => stepNumberField(f, +1)}
+                        disabled={isLoading}
+                        aria-label={`${t("input.stepUp")}: ${f.label}`}
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        className="field__stepBtn"
+                        onClick={() => stepNumberField(f, -1)}
+                        disabled={isLoading}
+                        aria-label={`${t("input.stepDown")}: ${f.label}`}
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <input
+                    className="field__input"
+                    name={f.name}
+                    type={f.type}
+                    value={formData[f.name]}
+                    placeholder={f.placeholder}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  />
+                )}
               </motion.label>
             ))}
 
@@ -180,7 +276,7 @@ function CropForm() {
                 disabled={isLoading}
                 aria-busy={isLoading}
               >
-                {isLoading ? "Requesting…" : "Get Recommendation"}
+                {isLoading ? t("form.loading") : t("form.submit")}
                 <span className="btn__arrow">→</span>
               </motion.button>
             </motion.div>
@@ -208,7 +304,7 @@ function CropForm() {
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
               <div>
-                <span className="resultBox__label">Recommended Crop</span>
+                <span className="resultBox__label">{t("result.recommended")}</span>
                 <div className="resultBox__value">{result.recommendation.crop}</div>
 
                 {(result.recommendation.yield !== undefined || result.recommendation.profit !== undefined) && (
@@ -218,7 +314,11 @@ function CropForm() {
                   </div>
                 )}
 
-                {result.source && <div className="resultMeta">Source: {result.source}</div>}
+                {result.source && (
+                  <div className="resultMeta">
+                    {t("result.source")}: {result.source}
+                  </div>
+                )}
 
                 {result.explanation && (
                   <div className="resultExplanation">
