@@ -22,6 +22,22 @@ function CropForm() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
+  // Voice input state.
+  const [isListening, setIsListening] = useState(false);
+  const [recognizedText, setRecognizedText] = useState("");
+  const [voiceError, setVoiceError] = useState("");
+
+  const recognitionRef = useRef(null);
+  const finalTranscriptRef = useRef("");
+  const recognizedTextRef = useRef("");
+
+  const SpeechRecognitionCtor = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }, []);
+
+  const canRecognize = Boolean(SpeechRecognitionCtor);
+
   // Keep a ref to the active timeout so we can clean up on unmount.
   const loadingTimerRef = useRef(null);
 
@@ -29,6 +45,12 @@ function CropForm() {
     return () => {
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);
+      }
+
+      try {
+        recognitionRef.current?.stop?.();
+      } catch {
+        // no-op
       }
     };
   }, []);
@@ -51,6 +73,151 @@ function CropForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const applyVoiceToForm = (rawText) => {
+    const original = String(rawText ?? "").trim();
+    if (!original) return;
+
+    // Normalize a bit for common STT output (e.g. "6 point 8").
+    const normalized = original
+      .toLowerCase()
+      .replace(/(\d)\s*point\s*(\d)/g, "$1.$2")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const pick = (re) => {
+      const m = normalized.match(re);
+      return m && m[1] != null ? String(m[1]).trim() : null;
+    };
+
+    const updates = {};
+    const labeled = {
+      N: pick(/(?:\bnitrogen\b|\bn\b)\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      P: pick(/(?:\bphosphorus\b|\bp\b)\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      K: pick(/(?:\bpotassium\b|\bk\b)\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      temperature: pick(/(?:\btemperature\b|\btemp\b)\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      humidity: pick(/\bhumidity\b\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      rainfall: pick(/(?:\brainfall\b|\brain\b)\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+      ph: pick(/\bph\b\s*(?:is|=|:)?\s*(-?\d+(?:\.\d+)?)/i),
+    };
+
+    const labeledFound = Object.values(labeled).some((v) => v != null && v !== "");
+    if (labeledFound) {
+      for (const [key, value] of Object.entries(labeled)) {
+        if (value != null && value !== "") updates[key] = value;
+      }
+    } else {
+      // If no labels are present, fall back to sequential fill.
+      const nums = normalized.match(/-?\d+(?:\.\d+)?/g) ?? [];
+      const order = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph"];
+      let idx = 0;
+
+      for (const key of order) {
+        const current = String(formData[key] ?? "").trim();
+        if (current) continue;
+        if (idx >= nums.length) break;
+        updates[key] = nums[idx++];
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      setVoiceError("No numbers detected. Try: Nitrogen 90, Phosphorus 40, Temperature 25");
+      return;
+    }
+
+    setVoiceError("");
+    setFormData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const stopListening = () => {
+    const rec = recognitionRef.current;
+    if (rec) {
+      try {
+        rec.stop();
+      } catch {
+        // no-op
+      }
+    }
+    setIsListening(false);
+  };
+
+  const startListening = () => {
+    setVoiceError("");
+
+    if (!canRecognize) {
+      setVoiceError("Speech recognition is not supported in this browser. Use Chrome.");
+      return;
+    }
+
+    // Reset transcript buffers.
+    finalTranscriptRef.current = "";
+    setRecognizedText("");
+
+    const rec = new SpeechRecognitionCtor();
+    recognitionRef.current = rec;
+
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = lang === "hi" ? "hi-IN" : lang === "mr" ? "mr-IN" : lang === "gu" ? "gu-IN" : "en-US";
+
+    rec.onstart = () => {
+      setIsListening(true);
+      setVoiceError("");
+    };
+
+    rec.onerror = (event) => {
+      const msg = event?.error
+        ? `Speech recognition error: ${event.error}`
+        : "Speech recognition error.";
+      setVoiceError(msg);
+      setIsListening(false);
+    };
+
+    rec.onresult = (event) => {
+      let interim = "";
+      let finalChunk = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        const transcript = event.results[i][0]?.transcript ?? "";
+        if (event.results[i].isFinal) {
+          finalChunk += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      if (finalChunk.trim()) {
+        finalTranscriptRef.current = `${finalTranscriptRef.current} ${finalChunk}`.replace(/\s+/g, " ").trim();
+      }
+
+      const combined = `${finalTranscriptRef.current} ${interim}`.replace(/\s+/g, " ").trim();
+      setRecognizedText(combined);
+      recognizedTextRef.current = combined;
+    };
+
+    rec.onspeechend = () => {
+      try {
+        rec.stop();
+      } catch {
+        // no-op
+      }
+    };
+
+    rec.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+
+      const finalText = String(finalTranscriptRef.current || recognizedTextRef.current).trim();
+      if (finalText) applyVoiceToForm(finalText);
+    };
+
+    try {
+      rec.start();
+    } catch {
+      setVoiceError("Unable to start microphone. Check permissions and try again.");
+      setIsListening(false);
+    }
   };
 
   const getStep = (field) => {
@@ -207,6 +374,41 @@ function CropForm() {
           <motion.p className="formSubtitle" variants={fadeUp}>
             {t("form.subtitle")}
           </motion.p>
+
+          <motion.div className="voiceRow" variants={fadeUp}>
+            <div className="voiceRow__actions">
+              <button
+                type="button"
+                className={`btn btn--ghost ${isListening ? "voiceBtn voiceBtn--active" : "voiceBtn"}`}
+                onClick={() => (isListening ? stopListening() : startListening())}
+                disabled={isLoading || !canRecognize}
+                aria-pressed={isListening}
+                aria-label={isListening ? "Stop listening" : "Start voice input"}
+                title={!canRecognize ? "Speech recognition requires Chrome" : undefined}
+              >
+                <span aria-hidden="true">{isListening ? "■" : "🎤"}</span>
+                {isListening ? "Listening…" : "Speak"}
+              </button>
+
+              <button
+                type="button"
+                className="btn btn--ghost voiceBtn"
+                onClick={() => {
+                  setRecognizedText("");
+                  setVoiceError("");
+                }}
+                disabled={isLoading || (!recognizedText && !voiceError)}
+              >
+                Clear
+              </button>
+            </div>
+
+            <div className="voiceBox" aria-live="polite">
+              <div className="voiceBox__label">Recognized text</div>
+              <div className="voiceBox__text">{recognizedText || "—"}</div>
+              {voiceError ? <div className="voiceBox__error">{voiceError}</div> : null}
+            </div>
+          </motion.div>
 
           <motion.form
             className="formGrid"

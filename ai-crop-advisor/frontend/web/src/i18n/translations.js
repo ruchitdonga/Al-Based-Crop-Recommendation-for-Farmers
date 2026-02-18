@@ -15,6 +15,7 @@ export const translations = {
   en: {
     "nav.home": "Home",
     "nav.cropAdvisor": "Crop Advisor",
+    "nav.voiceChat": "Voice Chat",
     "nav.language": "Language",
 
     "status.checking": "Checking backend…",
@@ -64,11 +65,25 @@ export const translations = {
 
     "input.stepUp": "Increase value",
     "input.stepDown": "Decrease value",
+
+    "voice.greeting": "Hi! Type a message or use the microphone to talk.",
+    "voice.title": "Voice Chat",
+    "voice.ready": "Ready",
+    "voice.listening": "Listening…",
+    "voice.speaking": "Speaking…",
+    "voice.placeholder": "Type your message…",
+    "voice.send": "Send",
+    "voice.micStart": "Start listening",
+    "voice.micStop": "Stop listening",
+    "voice.unsupported": "Speech recognition is not supported in this browser. Use Chrome.",
+    "voice.micPermission": "Unable to start microphone. Check permissions and try again.",
+    "voice.aiUnavailable": "AI service unavailable. Start Ollama and try again.",
   },
 
   hi: {
     "nav.home": "होम",
     "nav.cropAdvisor": "फसल सलाहकार",
+    "nav.voiceChat": "वॉइस चैट",
     "nav.language": "भाषा",
 
     "status.checking": "बैकएंड जांच रहे हैं…",
@@ -118,11 +133,25 @@ export const translations = {
 
     "input.stepUp": "मान बढ़ाएँ",
     "input.stepDown": "मान घटाएँ",
+
+    "voice.greeting": "नमस्ते! संदेश टाइप करें या माइक्रोफ़ोन से बोलें।",
+    "voice.title": "वॉइस चैट",
+    "voice.ready": "तैयार",
+    "voice.listening": "सुन रहे हैं…",
+    "voice.speaking": "बोल रहे हैं…",
+    "voice.placeholder": "अपना संदेश लिखें…",
+    "voice.send": "भेजें",
+    "voice.micStart": "सुनना शुरू करें",
+    "voice.micStop": "सुनना बंद करें",
+    "voice.unsupported": "इस ब्राउज़र में स्पीच रिकग्निशन समर्थित नहीं है। Chrome इस्तेमाल करें।",
+    "voice.micPermission": "माइक्रोफ़ोन शुरू नहीं हो पाया। परमिशन जांचें और फिर कोशिश करें।",
+    "voice.aiUnavailable": "AI सेवा उपलब्ध नहीं है। Ollama शुरू करें और फिर कोशिश करें।",
   },
 
   mr: {
     "nav.home": "मुख्यपृष्ठ",
     "nav.cropAdvisor": "पीक सल्लागार",
+    "nav.voiceChat": "व्हॉइस चॅट",
     "nav.language": "भाषा",
 
     "status.checking": "बॅकएंड तपासत आहोत…",
@@ -172,11 +201,25 @@ export const translations = {
 
     "input.stepUp": "मूल्य वाढवा",
     "input.stepDown": "मूल्य कमी करा",
+
+    "voice.greeting": "नमस्कार! संदेश टाइप करा किंवा माईक वापरून बोला.",
+    "voice.title": "व्हॉइस चॅट",
+    "voice.ready": "तयार",
+    "voice.listening": "ऐकत आहोत…",
+    "voice.speaking": "बोलत आहोत…",
+    "voice.placeholder": "संदेश लिहा…",
+    "voice.send": "पाठवा",
+    "voice.micStart": "ऐकणे सुरू करा",
+    "voice.micStop": "ऐकणे थांबवा",
+    "voice.unsupported": "या ब्राउझरमध्ये स्पीच रिकग्निशन सपोर्ट नाही. Chrome वापरा.",
+    "voice.micPermission": "माईक सुरू होऊ शकला नाही. परवानग्या तपासा आणि पुन्हा प्रयत्न करा.",
+    "voice.aiUnavailable": "AI सेवा उपलब्ध नाही. Ollama सुरू करा आणि पुन्हा प्रयत्न करा.",
   },
 
   gu: {
     "nav.home": "હોમ",
     "nav.cropAdvisor": "પાક સલાહકાર",
+    "nav.voiceChat": "વૉઇસ ચેટ",
     "nav.language": "ભાષા",
 
     "status.checking": "બેકએન્ડ તપાસી રહ્યા છીએ…",
@@ -226,6 +269,19 @@ export const translations = {
 
     "input.stepUp": "મૂલ્ય વધારો",
     "input.stepDown": "મૂલ્ય ઘટાડો",
+
+    "voice.greeting": "નમસ્તે! સંદેશ લખો અથવા માઇક્રોફોન વડે બોલો.",
+    "voice.title": "વૉઇસ ચેટ",
+    "voice.ready": "તૈયાર",
+    "voice.listening": "સાંભળી રહ્યા છીએ…",
+    "voice.speaking": "બોલી રહ્યા છીએ…",
+    "voice.placeholder": "તમારો સંદેશ લખો…",
+    "voice.send": "મોકલો",
+    "voice.micStart": "સાંભળવાનું શરૂ કરો",
+    "voice.micStop": "સાંભળવું બંધ કરો",
+    "voice.unsupported": "આ બ્રાઉઝરમાં સ્પીચ રિકગ્નિશન સપોર્ટ નથી. Chrome વાપરો.",
+    "voice.micPermission": "માઇક્રોફોન શરૂ ન થઈ શક્યો. પરવાનગી તપાસો અને ફરી પ્રયાસ કરો.",
+    "voice.aiUnavailable": "AI સેવા ઉપલબ્ધ નથી. Ollama શરૂ કરો અને ફરી પ્રયાસ કરો.",
   },
 };
 

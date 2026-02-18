@@ -50,6 +50,13 @@ function Navbar() {
             {t("nav.cropAdvisor")}
           </NavLink>
 
+          <NavLink
+            to="/voice"
+            className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
+          >
+            {t("nav.voiceChat")}
+          </NavLink>
+
           <label className="langPicker" aria-label={t("nav.language")}>
             <select
               className="langPicker__select"

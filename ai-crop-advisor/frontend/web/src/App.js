@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import TruckAnimation from "./components/TruckAnimation";
+import VoiceChat from "./components/VoiceChat";
 import Home from "./pages/Home";
 import CropForm from "./pages/CropForm";
 import { apiGet } from "./api";
@@ -26,6 +27,7 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/predict" element={<CropForm />} />
+          <Route path="/voice" element={<VoiceChat />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
