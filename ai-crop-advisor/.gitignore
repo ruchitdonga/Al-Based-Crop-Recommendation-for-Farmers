@@ -7,6 +7,7 @@ __pycache__/
 venv/
 .env.*
 *.log
+ai-crop-advisor/backend/models/crop_pipeline.pkl
 
 # Django
 *.sqlite3

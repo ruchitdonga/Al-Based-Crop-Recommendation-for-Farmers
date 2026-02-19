@@ -18,8 +18,8 @@ class MLContract:
     }
 
     OUTPUT_SCHEMA = {
-        "crop": str
-
+        "crop": str,
+        "confidence": float,
     }
 
     @classmethod
@@ -35,5 +35,10 @@ class MLContract:
         for key, expected_type in cls.OUTPUT_SCHEMA.items():
             if key not in data:
                 raise ValueError(f"Missing ML output key: {key}")
-            if not isinstance(data[key], expected_type):
-                raise TypeError(f"Invalid type for {key}")
+            # allow ints for float fields
+            if expected_type is float:
+                if not (isinstance(data[key], float) or isinstance(data[key], int)):
+                    raise TypeError(f"Invalid type for {key}")
+            else:
+                if not isinstance(data[key], expected_type):
+                    raise TypeError(f"Invalid type for {key}")
