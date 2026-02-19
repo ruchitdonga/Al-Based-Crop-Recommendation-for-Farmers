@@ -4,6 +4,6 @@ import App from './App';
 test('renders app home content', () => {
   render(<App />);
   expect(
-    screen.getByRole('heading', { name: /ai-based crop recommendation system/i })
+    screen.getByRole('heading', { name: /grow smarter with ai crop recommendations\./i })
   ).toBeInTheDocument();
 });

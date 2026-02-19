@@ -21,7 +21,7 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
 )
-from core.views import HealthCheckView
+from core.views import ChatView, HealthCheckView
 
 
 urlpatterns = [
@@ -29,6 +29,9 @@ urlpatterns = [
 
     # Health
     path("api/health/", HealthCheckView.as_view()),
+
+    # Chat (Ollama)
+    path("api/chat/", ChatView.as_view()),
 
 
 
