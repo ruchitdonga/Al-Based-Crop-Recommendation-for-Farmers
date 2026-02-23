@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import serializers
-from drf_spectacular.utils import extend_schema
-=======
->>>>>>> 0177704a771d929e9aa00481ee06ae789ba97bd7
 from datetime import datetime
 
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from services.llm_service import LLMService
 from services.system_check import SystemCheck
@@ -22,6 +16,10 @@ class HealthCheckSerializer(serializers.Serializer):
     status = serializers.CharField()
     timestamp = serializers.DateTimeField()
     services = serializers.DictField()
+
+
+class ChatRequestSerializer(serializers.Serializer):
+    message = serializers.CharField(required=True, max_length=1000)
 
 
 class HealthCheckView(APIView):
@@ -48,15 +46,17 @@ class HealthCheckView(APIView):
 
 class ChatView(APIView):
 
+    @extend_schema(
+        request=ChatRequestSerializer,
+        responses={200: dict},
+        description="AI Farming Chatbot"
+    )
     def post(self, request):
-        message = (request.data.get("message") or "").strip()
-        lang = (request.data.get("lang") or "en").strip().lower()
+        serializer = ChatRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if not message:
-            return Response(
-                {"error": "Missing 'message'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        message = serializer.validated_data["message"]
+        lang = request.data.get("lang", "en").strip().lower()
 
         language_hint = {
             "en": "English",
