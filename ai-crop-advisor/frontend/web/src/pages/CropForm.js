@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { apiPost } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
+import Dashboard from "../components/Dashboard";
+import LoadingSpinner from "../components/LoadingSpinner";
+import AudioVisualizer from "../components/AudioVisualizer";
 
 function CropForm() {
   const { lang, t } = useLanguage();
@@ -168,7 +171,7 @@ function CropForm() {
 
     rec.onerror = (event) => {
       const msg = event?.error
-        ? `Speech recognition error: ${event.error}`
+        ? `Speech recognition error: ${event.error} `
         : "Speech recognition error.";
       setVoiceError(msg);
       setIsListening(false);
@@ -188,10 +191,10 @@ function CropForm() {
       }
 
       if (finalChunk.trim()) {
-        finalTranscriptRef.current = `${finalTranscriptRef.current} ${finalChunk}`.replace(/\s+/g, " ").trim();
+        finalTranscriptRef.current = `${finalTranscriptRef.current} ${finalChunk} `.replace(/\s+/g, " ").trim();
       }
 
-      const combined = `${finalTranscriptRef.current} ${interim}`.replace(/\s+/g, " ").trim();
+      const combined = `${finalTranscriptRef.current} ${interim} `.replace(/\s+/g, " ").trim();
       setRecognizedText(combined);
       recognizedTextRef.current = combined;
     };
@@ -379,7 +382,7 @@ function CropForm() {
             <div className="voiceRow__actions">
               <button
                 type="button"
-                className={`btn btn--ghost ${isListening ? "voiceBtn voiceBtn--active" : "voiceBtn"}`}
+                className={`btn btn--ghost ${isListening ? "voiceBtn voiceBtn--active" : "voiceBtn"} `}
                 onClick={() => (isListening ? stopListening() : startListening())}
                 disabled={isLoading || !canRecognize}
                 aria-pressed={isListening}
@@ -404,7 +407,10 @@ function CropForm() {
             </div>
 
             <div className="voiceBox" aria-live="polite">
-              <div className="voiceBox__label">Recognized text</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="voiceBox__label">Recognized text</div>
+                <AudioVisualizer isListening={isListening} />
+              </div>
               <div className="voiceBox__text">{recognizedText || "—"}</div>
               {voiceError ? <div className="voiceBox__error">{voiceError}</div> : null}
             </div>
@@ -423,7 +429,8 @@ function CropForm() {
                 {f.type === "number" ? (
                   <div className="field__inputWrap">
                     <input
-                      className="field__input field__input--number"
+                      className={`field__input field__input--number ${formData[f.name] !== "" && !Number.isFinite(Number(formData[f.name])) ? 'field__input--invalid' : ''
+                        }`}
                       name={f.name}
                       type="number"
                       step={f.step}
@@ -433,13 +440,25 @@ function CropForm() {
                       inputMode="decimal"
                       disabled={isLoading}
                     />
+
+                    {/* Live Validation Feedback */}
+                    <div className="field__validationIcon">
+                      {formData[f.name] !== "" ? (
+                        Number.isFinite(Number(formData[f.name])) ? (
+                          <span className="icon-valid" title="Valid Input">✅</span>
+                        ) : (
+                          <span className="icon-invalid" title="Invalid Number">❌</span>
+                        )
+                      ) : null}
+                    </div>
+
                     <div className="field__stepper" aria-hidden={isLoading ? "true" : "false"}>
                       <button
                         type="button"
                         className="field__stepBtn"
                         onClick={() => stepNumberField(f, +1)}
                         disabled={isLoading}
-                        aria-label={`${t("input.stepUp")}: ${f.label}`}
+                        aria-label={`${t("input.stepUp")}: ${f.label} `}
                       >
                         ▲
                       </button>
@@ -448,7 +467,7 @@ function CropForm() {
                         className="field__stepBtn"
                         onClick={() => stepNumberField(f, -1)}
                         disabled={isLoading}
-                        aria-label={`${t("input.stepDown")}: ${f.label}`}
+                        aria-label={`${t("input.stepDown")}: ${f.label} `}
                       >
                         ▼
                       </button>
@@ -498,38 +517,31 @@ function CropForm() {
             </motion.p>
           )}
 
-          {result?.recommendation?.crop && (
-            <motion.div
-              className="resultBox"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            >
-              <div>
-                <span className="resultBox__label">{t("result.recommended")}</span>
-                <div className="resultBox__value">{result.recommendation.crop}</div>
+          <AnimatePresence mode="wait">
+            {isLoading && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}
+              >
+                <LoadingSpinner />
+              </motion.div>
+            )}
 
-                {(result.recommendation.yield !== undefined || result.recommendation.profit !== undefined) && (
-                  <div className="resultMeta">
-                    <span>Yield: {result.recommendation.yield ?? "—"}</span>
-                    <span>Profit: {result.recommendation.profit ?? "—"}</span>
-                  </div>
-                )}
-
-                {result.source && (
-                  <div className="resultMeta">
-                    {t("result.source")}: {result.source}
-                  </div>
-                )}
-
-                {result.explanation && (
-                  <div className="resultExplanation">
-                    {result.explanation}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
+            {!isLoading && result?.recommendation?.crop && (
+              <motion.div
+                key="dashboard"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Dashboard result={result} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </div>

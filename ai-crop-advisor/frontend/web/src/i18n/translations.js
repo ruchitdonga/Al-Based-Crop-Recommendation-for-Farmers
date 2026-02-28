@@ -78,6 +78,15 @@ export const translations = {
     "voice.unsupported": "Speech recognition is not supported in this browser. Use Chrome.",
     "voice.micPermission": "Unable to start microphone. Check permissions and try again.",
     "voice.aiUnavailable": "AI service unavailable. Start Ollama and try again.",
+
+    "dashboard.recommended": "Recommended Crop",
+    "dashboard.confidence": "Confidence",
+    "dashboard.sustainability": "Sustainability",
+    "dashboard.profit": "Estimated Profit",
+    "dashboard.hectare": "hectare",
+    "dashboard.profitComparison": "Profit Comparison",
+    "dashboard.alternatives": "Alternative Crops",
+    "dashboard.explanation": "Explanation",
   },
 
   hi: {
@@ -146,6 +155,15 @@ export const translations = {
     "voice.unsupported": "इस ब्राउज़र में स्पीच रिकग्निशन समर्थित नहीं है। Chrome इस्तेमाल करें।",
     "voice.micPermission": "माइक्रोफ़ोन शुरू नहीं हो पाया। परमिशन जांचें और फिर कोशिश करें।",
     "voice.aiUnavailable": "AI सेवा उपलब्ध नहीं है। Ollama शुरू करें और फिर कोशिश करें।",
+
+    "dashboard.recommended": "अनुशंसित फसल",
+    "dashboard.confidence": "विश्वास स्तर",
+    "dashboard.sustainability": "टिकाऊपन",
+    "dashboard.profit": "अनुमानित लाभ",
+    "dashboard.hectare": "हेक्टेयर",
+    "dashboard.profitComparison": "लाभ तुलना",
+    "dashboard.alternatives": "वैकल्पिक फसलें",
+    "dashboard.explanation": "विवरण",
   },
 
   mr: {
@@ -214,6 +232,15 @@ export const translations = {
     "voice.unsupported": "या ब्राउझरमध्ये स्पीच रिकग्निशन सपोर्ट नाही. Chrome वापरा.",
     "voice.micPermission": "माईक सुरू होऊ शकला नाही. परवानग्या तपासा आणि पुन्हा प्रयत्न करा.",
     "voice.aiUnavailable": "AI सेवा उपलब्ध नाही. Ollama सुरू करा आणि पुन्हा प्रयत्न करा.",
+
+    "dashboard.recommended": "शिफारस केलेले पीक",
+    "dashboard.confidence": "विश्वासार्हता",
+    "dashboard.sustainability": "शाश्वतता",
+    "dashboard.profit": "अंदाजित नफा",
+    "dashboard.hectare": "हेक्टर",
+    "dashboard.profitComparison": "नफा तुलना",
+    "dashboard.alternatives": "पर्यायी पिके",
+    "dashboard.explanation": "स्पष्टीकरण",
   },
 
   gu: {
@@ -282,6 +309,15 @@ export const translations = {
     "voice.unsupported": "આ બ્રાઉઝરમાં સ્પીચ રિકગ્નિશન સપોર્ટ નથી. Chrome વાપરો.",
     "voice.micPermission": "માઇક્રોફોન શરૂ ન થઈ શક્યો. પરવાનગી તપાસો અને ફરી પ્રયાસ કરો.",
     "voice.aiUnavailable": "AI સેવા ઉપલબ્ધ નથી. Ollama શરૂ કરો અને ફરી પ્રયાસ કરો.",
+
+    "dashboard.recommended": "ભલામણ કરેલો પાક",
+    "dashboard.confidence": "વિશ્વાસ",
+    "dashboard.sustainability": "ટકાઉપણું",
+    "dashboard.profit": "અંદાજિત નફો",
+    "dashboard.hectare": "હેક્ટર",
+    "dashboard.profitComparison": "નફો સરખામણી",
+    "dashboard.alternatives": "વૈકલ્પિક પાક",
+    "dashboard.explanation": "સ્પષ્ટીકરણ",
   },
 };
 
