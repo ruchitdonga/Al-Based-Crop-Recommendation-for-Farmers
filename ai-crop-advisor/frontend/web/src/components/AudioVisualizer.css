@@ -1,0 +1,41 @@
+.audioVisualizer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 24px;
+    opacity: 0.3;
+    transition: opacity 300ms ease;
+}
+
+.audioVisualizer.is-active {
+    opacity: 1;
+}
+
+.waveBar {
+    width: 4px;
+    height: 6px;
+    background-color: rgba(34, 197, 94, 0.9);
+    border-radius: 99px;
+    transition: height 300ms ease;
+    will-change: transform, height;
+}
+
+.audioVisualizer.is-active .waveBar {
+    animation: waveBounce 1.2s ease-in-out infinite;
+    background-color: rgba(34, 197, 94, 1);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+@keyframes waveBounce {
+
+    0%,
+    100% {
+        height: 8px;
+        transform: scaleY(1);
+    }
+
+    50% {
+        height: 24px;
+        transform: scaleY(1.1);
+    }
+}

@@ -1,79 +1,77 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import "../Navbar.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { LANGS } from "../i18n/translations";
 
-function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { lang, setLang, t } = useLanguage();
+const Navbar = () => {
+  const { lang, setLanguage, t } = useLanguage();
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const getLinkClass = (path) => {
+    return location.pathname === path ? "navLink navLink--active" : "navLink";
+  };
+
+  const closeMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <nav
-      className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`}
-    >
-      <div className="navbar__marquee" aria-label="Site banner">
-        <div className="navbar__marqueeTrack" aria-hidden="true">
-          <span className="navbar__marqueeText">
-            <span className="navbar__growPlant" aria-hidden="true">🌱</span>
-            Aura farmed by Krish Niyush Ruchit
+    <nav className="navbar">
+      <div className="navbar__container">
+        <Link to="/" className="navLogo" onClick={closeMenu}>
+          <span role="img" aria-label="leaf" className="navLogo__icon">
+            🌿
           </span>
-        </div>
-      </div>
+          CropAdvisor
+        </Link>
 
-      <div className="navbar__inner">
-        <NavLink to="/" className="navbar__brand" aria-label="CropAdvisor home">
-          <span className="navbar__brandIcon">🌿</span>
-          <span className="navbar__brandText">CropAdvisor</span>
-        </NavLink>
+        <button
+          className={`mobileMenuBtn ${isMobileMenuOpen ? 'mobileMenuBtn--open' : ''}`}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle navigation"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
-        <div className="navbar__links" role="navigation" aria-label="Primary">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
-          >
-            {t("nav.home")}
-          </NavLink>
-          <NavLink
-            to="/predict"
-            className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
-          >
+        <div className={`navLinks ${isMobileMenuOpen ? 'navLinks--open' : ''}`}>
+          <Link to="/features" className={getLinkClass("/features")} onClick={closeMenu}>
+            Features
+          </Link>
+          <Link to="/how-it-works" className={getLinkClass("/how-it-works")} onClick={closeMenu}>
+            How it Works
+          </Link>
+          <Link to="/predict" className={getLinkClass("/predict")} onClick={closeMenu}>
             {t("nav.cropAdvisor")}
-          </NavLink>
-
-          <NavLink
-            to="/voice"
-            className={({ isActive }) => `navlink ${isActive ? "navlink--active" : ""}`}
-          >
+          </Link>
+          <Link to="/voice" className={getLinkClass("/voice")} onClick={closeMenu}>
             {t("nav.voiceChat")}
-          </NavLink>
+          </Link>
 
-          <label className="langPicker" aria-label={t("nav.language")}>
+          <div className="langPicker">
             <select
               className="langPicker__select"
               value={lang}
-              onChange={(e) => setLang(e.target.value)}
-            >
-              {LANGS.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+                closeMenu();
+              }}
+              aria-label="Select Language"
+            >    {LANGS.map((l) => (
+              <option key={l.value} value={l.value}>
+                {l.label}
+              </option>
+            ))}
             </select>
-          </label>
+          </div>
         </div>
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

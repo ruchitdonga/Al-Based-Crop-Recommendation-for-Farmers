@@ -5,9 +5,15 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import TruckAnimation from "./components/TruckAnimation";
+import LiveGrass from "./components/LiveGrass";
+import PollenParticles from "./components/PollenParticles";
 import VoiceChat from "./components/VoiceChat";
 import Home from "./pages/Home";
 import CropForm from "./pages/CropForm";
+import Features from "./pages/Features";
+import HowItWorks from "./pages/HowItWorks";
+import NotFound from "./pages/NotFound";
+import Footer from "./components/Footer";
 import { apiGet } from "./api";
 import { useLanguage } from "./i18n/LanguageContext";
 
@@ -28,6 +34,9 @@ function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/predict" element={<CropForm />} />
           <Route path="/voice" element={<VoiceChat />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -88,14 +97,21 @@ function App() {
 
   return (
     <Router>
-      <Navbar />
-      <TruckAnimation />
-      {backendStatus.state === "down" && (
-        <div className="statusBanner" role="status" aria-live="polite">
-          {backendStatus.message}
-        </div>
-      )}
-      <AnimatedRoutes />
+      <div className="app-container">
+        <PollenParticles />
+        <Navbar />
+        <LiveGrass />
+        <TruckAnimation />
+        {backendStatus.state === "down" && (
+          <div className="statusBanner" role="status" aria-live="polite">
+            {backendStatus.message}
+          </div>
+        )}
+        <main className="app-main">
+          <AnimatedRoutes />
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
 }
