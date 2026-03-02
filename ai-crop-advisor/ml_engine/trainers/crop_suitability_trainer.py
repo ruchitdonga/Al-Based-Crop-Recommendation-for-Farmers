@@ -1,23 +1,22 @@
 import pandas as pd
 import joblib
 from pathlib import Path
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
-
+from xgboost import XGBClassifier
+from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+from sklearn.calibration import CalibratedClassifierCV
 
 # ===== Config =====
 DATASET_PATH = Path.home() / "Downloads" / "Crop_recommendation.csv"
+
 ARTIFACTS_DIR = Path("artifacts")
 ARTIFACTS_DIR.mkdir(exist_ok=True)
 
 PIPELINE_PATH = ARTIFACTS_DIR / "crop_pipeline.pkl"
-METADATA_PATH = ARTIFACTS_DIR / "crop_pipeline_metadata.json"
 
 FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
-MODEL_VERSION = "1.0.0"
+MODEL_VERSION = "4.0.0"  # Version bump (calibrated)
 
 
 def main():
@@ -27,46 +26,80 @@ def main():
     X = df[FEATURES]
     y_raw = df["label"]
 
-    # Encode labels
     encoder = LabelEncoder()
     y = encoder.fit_transform(y_raw)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+    # Base XGBoost model
+    xgb = XGBClassifier(
+        objective="multi:softprob",
+        eval_metric="mlogloss",
+        random_state=42
     )
 
-    # Build pipeline
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("model", RandomForestClassifier(
-            n_estimators=200,
-            max_depth=10,
-            random_state=42
-        ))
-    ])
+    # Hyperparameter search space
+    param_dist = {
+        "n_estimators": [200, 300, 400],
+        "max_depth": [4, 5, 6],
+        "learning_rate": [0.01, 0.03, 0.05],
+        "subsample": [0.8, 0.9],
+        "colsample_bytree": [0.7, 0.8]
+    }
 
-    print("Training pipeline...")
-    pipeline.fit(X_train, y_train)
+    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
-    # Evaluation
-    y_pred = pipeline.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
+    search = RandomizedSearchCV(
+        estimator=xgb,
+        param_distributions=param_dist,
+        n_iter=8,
+        scoring="accuracy",
+        cv=cv,
+        verbose=1,
+        random_state=42,
+        n_jobs=-1
+    )
 
-    print(f"Accuracy: {accuracy:.4f}")
-    print(classification_report(y_test, y_pred))
+    print("Running hyperparameter search...")
+    search.fit(X, y)
 
-    # Save full inference object
+    base_model = search.best_estimator_
+
+    print("\nBest Parameters:")
+    print(search.best_params_)
+
+    print("\nBest Cross-Validation Accuracy:")
+    print(search.best_score_)
+
+    # ---- Probability Calibration ----
+    print("\nCalibrating probabilities...")
+    calibrated_model = CalibratedClassifierCV(
+        base_model,
+        method="isotonic",
+        cv=3
+    )
+
+    calibrated_model.fit(X, y)
+
+    # Final training accuracy (on calibrated model)
+    y_pred = calibrated_model.predict(X)
+    final_accuracy = accuracy_score(y, y_pred)
+
+    print("\nFinal Training Accuracy:")
+    print(final_accuracy)
+
+    # Save artifact
     artifact = {
-        "pipeline": pipeline,
+        "pipeline": calibrated_model,
         "label_encoder": encoder,
         "model_version": MODEL_VERSION,
         "features": FEATURES,
-        "accuracy": accuracy
+        "cv_accuracy": float(search.best_score_),
+        "train_accuracy": float(final_accuracy),
+        "best_params": search.best_params_
     }
 
     joblib.dump(artifact, PIPELINE_PATH)
 
-    print(f"✅ Pipeline saved to {PIPELINE_PATH}")
+    print(f"\n✅ Calibrated XGBoost model saved to {PIPELINE_PATH}")
     print(f"Model version: {MODEL_VERSION}")
 
 
