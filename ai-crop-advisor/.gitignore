@@ -1,8 +1,27 @@
 artifacts/
 crop_pipeline.zip
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+venv/
+.env.*
+*.log
+ai-crop-advisor/backend/models/crop_pipeline.pkl
+
+# Django
+*.sqlite3
+db.sqlite3
+staticfiles/
+
+# OS files
+.DS_Store
+Thumbs.db
+.idea/
+.idea/
+
+d
+# =====================
+# ML / Data artifacts
+# =====================
 
 *.pkl
 *.csv

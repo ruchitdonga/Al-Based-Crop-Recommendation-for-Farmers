@@ -1,0 +1,97 @@
+.liveGrassContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    overflow: hidden;
+    pointer-events: none;
+    /* Let users click through the grass to footer links */
+    z-index: 30;
+    /* Create a gentle fade-out at the edges so it blends if the screen is super wide */
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.grassLayer {
+    position: absolute;
+    bottom: 0;
+    left: -20px;
+    /* Bleed past edge */
+    right: -20px;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.grassLayer--back {
+    z-index: 1;
+    filter: brightness(0.7) blur(1px);
+}
+
+.grassLayer--front {
+    z-index: 2;
+    filter: drop-shadow(0 -2px 10px rgba(16, 185, 129, 0.2));
+}
+
+.grassBlade {
+    position: absolute;
+    bottom: -10px;
+    /* Hide the flat bottom edge */
+    width: 6px;
+    border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%;
+    /* Leaf shape */
+    transform-origin: bottom center;
+    will-change: transform;
+}
+
+.grassBlade--back {
+    background: linear-gradient(to top, rgba(11, 48, 25, 1), rgba(20, 92, 48, 0.9));
+    animation: swayBack ease-in-out infinite alternate;
+    width: 5px;
+}
+
+.grassBlade--front {
+    background: linear-gradient(to top, rgba(16, 74, 39, 1), rgba(34, 197, 94, 0.95));
+    animation: swayFront ease-in-out infinite alternate;
+}
+
+/* Base keyframes, components use JS to inject random duration/delay */
+@keyframes swayBack {
+    0% {
+        transform: rotate(-8deg);
+    }
+
+    100% {
+        transform: rotate(12deg);
+    }
+}
+
+@keyframes swayFront {
+    0% {
+        transform: rotate(-12deg);
+    }
+
+    100% {
+        transform: rotate(16deg);
+    }
+}
+
+/* Add a subtle global wind ripple effect across the whole container */
+@keyframes globalWind {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(-15px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.liveGrassContainer {
+    animation: globalWind 12s ease-in-out infinite;
+}

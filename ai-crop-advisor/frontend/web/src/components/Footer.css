@@ -1,0 +1,112 @@
+.footer {
+    margin-top: 60px;
+    padding: 60px 20px 20px;
+    background: linear-gradient(180deg, rgba(4, 11, 7, 0.4), rgba(4, 11, 7, 0.9));
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.footer__container {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer__brand {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.footer__logo {
+    margin: 0 0 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.98), rgba(34, 197, 94, 0.92));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.footer__tagline {
+    margin: 0;
+    color: rgba(235, 255, 242, 0.65);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer__links {
+    display: flex;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+
+.footer__group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer__heading {
+    margin: 0 0 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer__link {
+    color: rgba(235, 255, 242, 0.55);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 200ms ease;
+}
+
+.footer__link:hover {
+    color: rgba(34, 197, 94, 0.9);
+}
+
+.footer__bottom {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    color: rgba(235, 255, 242, 0.4);
+    font-size: 13px;
+}
+
+.footer__disclaimer {
+    margin: 0;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .footer__container {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer__links {
+        gap: 40px;
+    }
+
+    .footer__bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+}

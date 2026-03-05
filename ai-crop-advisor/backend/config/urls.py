@@ -21,13 +21,18 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
 )
-from core.views import health_check
+from core.views import ChatView, HealthCheckView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Health
-    path('api/health/', health_check),
+    path("api/health/", HealthCheckView.as_view()),
+
+    # Chat (Ollama)
+    path("api/chat/", ChatView.as_view()),
+
 
 
     # OpenAPI

@@ -1,9 +1,16 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from "@testing-library/react";
+
+import App from "./App";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 test('renders app home content', () => {
-  render(<App />);
+  window.localStorage.setItem("cropAdvisor.lang", "en");
+  render(
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
   expect(
-    screen.getByRole('heading', { name: /ai-based crop recommendation system/i })
+    screen.getByRole('heading', { name: /grow smarter with ai crop recommendations\./i })
   ).toBeInTheDocument();
 });

@@ -1,0 +1,48 @@
+.pollenContainer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    /* Crucial: ensures users can still click through the particles */
+    z-index: 0;
+    /* Keep it behind main content but above the very bottom background */
+    overflow: hidden;
+}
+
+.pollenParticle {
+    position: absolute;
+    background-color: rgba(255, 235, 180, 0.8);
+    /* Warm, pollen-like color */
+    border-radius: 50%;
+    filter: blur(1px);
+    /* Soften the edges */
+    box-shadow: 0 0 4px rgba(255, 235, 180, 0.6);
+    /* Slight glow */
+    animation-name: floatParticle;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform, opacity;
+}
+
+/* 
+  The particles will slowly drift upwards and diagonally.
+  When they hit the end of their animation, they fade out, jump back down, and fade in to loop.
+*/
+@keyframes floatParticle {
+    0% {
+        transform: translate(0, 0) scale(0.8);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: var(--pollen-opacity, 0.6);
+    }
+
+    85% {
+        opacity: var(--pollen-opacity, 0.6);
+    }
+
+    100% {
+        transform: translate(-15vw, -30vh) scale(1.2);
+        opacity: 0;
+    }
+}
