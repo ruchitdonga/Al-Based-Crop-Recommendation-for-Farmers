@@ -1,7 +1,5 @@
-# Environment variables
-.env
-
-# Python
+artifacts/
+crop_pipeline.zip
 __pycache__/
 *.py[cod]
 venv/
@@ -25,16 +23,5 @@ d
 # ML / Data artifacts
 # =====================
 
-# Trained models
-artifacts/
 *.pkl
-*.joblib
-
-# Datasets
 *.csv
-*.xlsx
-*.xls
-
-# Experiments / temp
-runs/
-outputs/
