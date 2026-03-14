@@ -27,7 +27,7 @@ class RecommendView(APIView):
     )
     def post(self, request):
 
-        # STEP 1 — Validate request
+        
         serializer = RecommendRequestSerializer(data=request.data)
 
         if not serializer.is_valid():

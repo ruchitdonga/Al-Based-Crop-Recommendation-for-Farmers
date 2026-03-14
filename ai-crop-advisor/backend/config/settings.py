@@ -55,9 +55,6 @@ INSTALLED_APPS = [
 
     # Local
     'core',
-    'crops',
-    'soil',
-    'weather',
     'recommendations',
 ]
 
