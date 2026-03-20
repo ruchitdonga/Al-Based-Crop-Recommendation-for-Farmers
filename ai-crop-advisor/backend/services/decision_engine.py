@@ -59,6 +59,7 @@ def decide_crop(data: dict) -> dict:
         return {
             "crop": crop,
             "confidence": confidence,
+            "estimated_yield": prediction.get("estimated_yield"),
             "source": ml_result["source"],
             "model_version": ml_result["model_version"],
             "reason": "ml_prediction"

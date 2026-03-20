@@ -1,0 +1,3 @@
+Valid Yield crops format example: ['Arecanut', 'Arhar/Tur', 'Bajra', 'Banana', 'Barley']
+Is 'jute' in valid_crops? False
+Is 'Jute' in valid_crops? True

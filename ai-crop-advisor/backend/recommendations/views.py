@@ -49,12 +49,18 @@ class RecommendView(APIView):
             "soil": soil,
             "climate": climate,
             "last_crop": last_crop,
+            "state": data.get("state", "Maharashtra"),
+            "season": data.get("season", "Kharif"),
+            "area": data.get("area", 1.0),
+            "pesticide": data.get("pesticide", 0.0),
+            "crop_year": data.get("crop_year", 2024),
         }
 
         result = decide_crop(decision_input)
 
         crop = result.get("crop")
         confidence = result.get("confidence", 0.0)
+        estimated_yield = result.get("estimated_yield")
         source = result.get("source")
         model_version = result.get("model_version")
         reason = result.get("reason", "unknown")
@@ -79,6 +85,7 @@ class RecommendView(APIView):
             "recommendation": {
                 "crop": crop,
                 "confidence": confidence,
+                "estimated_yield": estimated_yield,
             },
             "explanation": explanation,
             "source": source,
