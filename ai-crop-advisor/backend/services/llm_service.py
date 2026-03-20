@@ -5,7 +5,7 @@ class LLMService:
 
     def __init__(self):
         self.url = "http://localhost:11434/api/generate"
-        self.model = "llama3.1"
+        self.model = "gpt-oss:120b-cloud"
 
     def reason_multilingual(self, prompt: str) -> str:
 
