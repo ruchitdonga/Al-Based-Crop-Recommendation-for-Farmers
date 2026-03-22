@@ -5,7 +5,7 @@ class LLMService:
 
     def __init__(self):
         self.url = "http://localhost:11434/api/generate"
-        self.model = "llama3.1"
+        self.model = "gpt-oss:120b-cloud"
 
     def reason_multilingual(self, prompt: str) -> str:
 
@@ -22,7 +22,7 @@ class LLMService:
 
         if response.status_code != 200:
             raise Exception(
-                f"Ollama error {response.status_code}: {response.text}"
+                f"LLM error {response.status_code}: {response.text}"
             )
 
         return response.json()["response"].strip()

@@ -5,3 +5,10 @@ scikit-learn==1.7.2
 numpy
 pandas
 joblib
+gunicorn
+whitenoise
+psycopg2-binary
+dj-database-url
+xgboost
+python-dotenv
+requests

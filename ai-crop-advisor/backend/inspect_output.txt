@@ -1,0 +1,3 @@
+Features for Wheat:
+['Crop_Year' 'Area' 'Annual_Rainfall' 'Fertilizer' 'Pesticide'
+ 'Fertilizer_per_area' 'Pesticide_per_area' 'Season_enc' 'State_enc']

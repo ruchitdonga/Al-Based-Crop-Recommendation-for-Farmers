@@ -22,7 +22,11 @@ class SystemCheck:
     def check_feature_mapper(self):
         try:
             fm = FeatureMapper()
-            fm.build_feature_vector({"soil": {"ph": 6.5}})
+            mock_input = {
+                "soil": {"N": 0, "P": 0, "K": 0, "ph": 6.5},
+                "climate": {"temperature": 0, "humidity": 0, "rainfall": 0}
+            }
+            fm.build_feature_vector(mock_input)
             return "ready"
         except Exception:
             return "error"
@@ -30,7 +34,12 @@ class SystemCheck:
     def check_ml_client(self):
         try:
             ml = MLClient()
-            ml.predict({"soil": {"ph": 6.5}})
+            mock_features = {
+                "N": 0, "P": 0, "K": 0,
+                "temperature": 0, "humidity": 0,
+                "ph": 6.5, "rainfall": 0
+            }
+            ml.predict(mock_features)
             return "ready"
         except Exception:
             return "error"

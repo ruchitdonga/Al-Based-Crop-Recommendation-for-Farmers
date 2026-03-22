@@ -29,6 +29,13 @@ class RecommendRequestSerializer(serializers.Serializer):
 
     last_crop = serializers.CharField(required=False, allow_blank=True)
 
+    # Yield Model Optional Fields
+    state = serializers.CharField(required=False, default="Maharashtra")
+    season = serializers.CharField(required=False, default="Kharif")
+    area = serializers.FloatField(required=False, default=1.0)
+    pesticide = serializers.FloatField(required=False, default=0.0)
+    crop_year = serializers.IntegerField(required=False, default=2024)
+
     lang = serializers.ChoiceField(
         choices=["en", "mr", "hi", "gu"],
         default="en"
