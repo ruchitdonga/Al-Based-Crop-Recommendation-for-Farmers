@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 
 import "./App.css";
 import Navbar from "./components/Navbar";
-import TruckAnimation from "./components/TruckAnimation";
-import LiveGrass from "./components/LiveGrass";
 import PollenParticles from "./components/PollenParticles";
 import VoiceChat from "./components/VoiceChat";
 import Home from "./pages/Home";
@@ -100,8 +98,6 @@ function App() {
       <div className="app-container">
         <PollenParticles />
         <Navbar />
-        <LiveGrass />
-        <TruckAnimation />
         {backendStatus.state === "down" && (
           <div className="statusBanner" role="status" aria-live="polite">
             {backendStatus.message}

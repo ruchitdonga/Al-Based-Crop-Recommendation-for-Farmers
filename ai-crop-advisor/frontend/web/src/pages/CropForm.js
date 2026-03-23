@@ -72,6 +72,19 @@ function CropForm() {
     [t]
   );
 
+  const sliderBoundsByField = useMemo(
+    () => ({
+      N: { min: 0, max: 140 },
+      P: { min: 0, max: 145 },
+      K: { min: 0, max: 205 },
+      temperature: { min: -10, max: 60 },
+      humidity: { min: 0, max: 100 },
+      rainfall: { min: 0, max: 300 },
+      ph: { min: 0, max: 14 },
+    }),
+    []
+  );
+
   // Generic change handler for all inputs.
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -234,6 +247,31 @@ function CropForm() {
     const text = String(stepRaw);
     const idx = text.indexOf(".");
     return idx >= 0 ? Math.max(0, text.length - idx - 1) : 0;
+  };
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const getSliderBounds = (field) => {
+    const fallback = { min: 0, max: 100 };
+    const bounds = sliderBoundsByField[field?.name];
+    return bounds ? bounds : fallback;
+  };
+
+  const setFieldFromNumber = (field, nextNumber) => {
+    const decimals = getDecimals(field);
+    const next = Number(nextNumber);
+    if (!Number.isFinite(next)) return;
+
+    const nextText = decimals > 0 ? next.toFixed(decimals) : String(next);
+    setFormData((prev) => ({ ...prev, [field.name]: nextText }));
+  };
+
+  const getSliderValue = (field) => {
+    const { min, max } = getSliderBounds(field);
+    const raw = String(formData[field.name] ?? "").trim();
+    const current = Number(raw);
+    const base = Number.isFinite(current) ? current : min;
+    return clamp(base, min, max);
   };
 
   const stepNumberField = (field, direction) => {
@@ -427,52 +465,68 @@ function CropForm() {
               <motion.label key={f.name} className="field" variants={fadeUp}>
                 <span className="field__label">{f.label}</span>
                 {f.type === "number" ? (
-                  <div className="field__inputWrap">
-                    <input
-                      className={`field__input field__input--number ${formData[f.name] !== "" && !Number.isFinite(Number(formData[f.name])) ? 'field__input--invalid' : ''
-                        }`}
-                      name={f.name}
-                      type="number"
-                      step={f.step}
-                      value={formData[f.name]}
-                      placeholder={f.placeholder}
-                      onChange={handleChange}
-                      inputMode="decimal"
-                      disabled={isLoading}
-                    />
+                  <>
+                    <div className="field__inputWrap">
+                      <input
+                        className={`field__input field__input--number ${formData[f.name] !== "" && !Number.isFinite(Number(formData[f.name])) ? 'field__input--invalid' : ''
+                          }`}
+                        name={f.name}
+                        type="number"
+                        step={f.step}
+                        value={formData[f.name]}
+                        placeholder={f.placeholder}
+                        onChange={handleChange}
+                        inputMode="decimal"
+                        disabled={isLoading}
+                      />
 
-                    {/* Live Validation Feedback */}
-                    <div className="field__validationIcon">
-                      {formData[f.name] !== "" ? (
-                        Number.isFinite(Number(formData[f.name])) ? (
-                          <span className="icon-valid" title="Valid Input">✅</span>
-                        ) : (
-                          <span className="icon-invalid" title="Invalid Number">❌</span>
-                        )
-                      ) : null}
+                      {/* Live Validation Feedback */}
+                      <div className="field__validationIcon">
+                        {formData[f.name] !== "" ? (
+                          Number.isFinite(Number(formData[f.name])) ? (
+                            <span className="icon-valid" title="Valid Input">✅</span>
+                          ) : (
+                            <span className="icon-invalid" title="Invalid Number">❌</span>
+                          )
+                        ) : null}
+                      </div>
+
+                      <div className="field__stepper" aria-hidden={isLoading ? "true" : "false"}>
+                        <button
+                          type="button"
+                          className="field__stepBtn"
+                          onClick={() => stepNumberField(f, +1)}
+                          disabled={isLoading}
+                          aria-label={`${t("input.stepUp")}: ${f.label} `}
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          className="field__stepBtn"
+                          onClick={() => stepNumberField(f, -1)}
+                          disabled={isLoading}
+                          aria-label={`${t("input.stepDown")}: ${f.label} `}
+                        >
+                          ▼
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="field__stepper" aria-hidden={isLoading ? "true" : "false"}>
-                      <button
-                        type="button"
-                        className="field__stepBtn"
-                        onClick={() => stepNumberField(f, +1)}
+                    <div className="field__sliderRow">
+                      <input
+                        className="field__slider"
+                        type="range"
+                        min={getSliderBounds(f).min}
+                        max={getSliderBounds(f).max}
+                        step={getStep(f)}
+                        value={getSliderValue(f)}
+                        onChange={(e) => setFieldFromNumber(f, e.target.value)}
                         disabled={isLoading}
-                        aria-label={`${t("input.stepUp")}: ${f.label} `}
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="field__stepBtn"
-                        onClick={() => stepNumberField(f, -1)}
-                        disabled={isLoading}
-                        aria-label={`${t("input.stepDown")}: ${f.label} `}
-                      >
-                        ▼
-                      </button>
+                        aria-label={`${f.label} slider`}
+                      />
                     </div>
-                  </div>
+                  </>
                 ) : (
                   <input
                     className="field__input"

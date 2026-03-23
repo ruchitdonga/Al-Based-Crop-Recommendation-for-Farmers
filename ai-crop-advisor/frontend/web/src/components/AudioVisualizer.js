@@ -1,5 +1,4 @@
 import React from 'react';
-import './AudioVisualizer.css';
 
 const AudioVisualizer = ({ isListening }) => {
     // We'll create 5 bars for a simple, recognizable audio wave look

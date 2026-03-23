@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-import "../Navbar.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { LANGS } from "../i18n/translations";
 

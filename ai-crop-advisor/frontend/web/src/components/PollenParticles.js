@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import './PollenParticles.css';
 
 const PollenParticles = () => {
     // Generate an array of random particles for a natural, dusty feel

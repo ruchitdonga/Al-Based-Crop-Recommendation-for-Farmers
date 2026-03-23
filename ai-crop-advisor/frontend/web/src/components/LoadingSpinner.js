@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
-import './LoadingSpinner.css';
 
 const LoadingSpinner = () => {
     const { t } = useLanguage();

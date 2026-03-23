@@ -6,6 +6,7 @@ const STORAGE_KEY = "cropAdvisor.lang";
 const LanguageContext = createContext({
   lang: DEFAULT_LANG,
   setLang: () => {},
+  setLanguage: () => {},
   t: (key) => key,
 });
 
@@ -25,6 +26,7 @@ export function LanguageProvider({ children }) {
     () => ({
       lang,
       setLang,
+      setLanguage: setLang,
       t: (key) => translate(lang, key),
     }),
     [lang]
