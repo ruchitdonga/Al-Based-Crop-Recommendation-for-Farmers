@@ -19,7 +19,12 @@ class MLClient:
 
         # Load serialized dictionaries
         crop_model_data = joblib.load(crop_model_path)
-        yield_model_data = joblib.load(yield_model_path)
+
+        yield_model_data = None
+        try:
+            yield_model_data = joblib.load(yield_model_path)
+        except FileNotFoundError:
+            yield_model_data = None
 
         # Extract components
         self.pipeline = crop_model_data["pipeline"]
@@ -28,11 +33,17 @@ class MLClient:
         self.feature_order = crop_model_data["features"]
         self.accuracy = crop_model_data.get("accuracy")
 
-        # Yield Model components
-        self.yield_models_dict = yield_model_data.get("crop_models", {})
-        self.season_encoder = yield_model_data.get("season_encoder")
-        self.state_encoder = yield_model_data.get("state_encoder")
-        self.valid_yield_crops = yield_model_data.get("valid_crops", [])
+        # Yield Model components (optional)
+        if yield_model_data:
+            self.yield_models_dict = yield_model_data.get("crop_models", {})
+            self.season_encoder = yield_model_data.get("season_encoder")
+            self.state_encoder = yield_model_data.get("state_encoder")
+            self.valid_yield_crops = yield_model_data.get("valid_crops", [])
+        else:
+            self.yield_models_dict = {}
+            self.season_encoder = None
+            self.state_encoder = None
+            self.valid_yield_crops = []
 
     def predict(self, features: dict) -> dict:
 
@@ -63,7 +74,12 @@ class MLClient:
         # Yield Prediction
         estimated_yield = None
         yield_prediction_key = prediction.capitalize()
-        if yield_prediction_key in self.valid_yield_crops and yield_prediction_key in self.yield_models_dict:
+        if (
+            self.season_encoder
+            and self.state_encoder
+            and yield_prediction_key in self.valid_yield_crops
+            and yield_prediction_key in self.yield_models_dict
+        ):
             try:
                 area = float(features.get("area", 1.0))
                 annual_rainfall = float(features.get("rainfall", 0) * 12)  # Proxy for annual

@@ -7,3 +7,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 **/node_modules/
+
+# Local Python venvs
+.venv/
+
+# Frontend build output (generated)
+ai-crop-advisor/frontend/web/build/

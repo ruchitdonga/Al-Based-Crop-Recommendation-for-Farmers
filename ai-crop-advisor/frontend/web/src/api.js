@@ -1,5 +1,12 @@
-export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, "") ?? "/api";
+function getDefaultApiBaseUrl() {
+  // Default to the deployed Render backend. If you want local dev via CRA proxy,
+  // set `REACT_APP_API_BASE_URL=/api`.
+  return "https://ai-crop-backend-1j72.onrender.com/api";
+}
+
+export const API_BASE_URL = (
+  process.env.REACT_APP_API_BASE_URL ?? getDefaultApiBaseUrl()
+).replace(/\/$/, "");
 
 async function parseJsonSafe(response) {
   const text = await response.text();
