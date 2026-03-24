@@ -72,6 +72,15 @@ def decide_crop(data: dict) -> dict:
                 "reason": "low_confidence_fallback"
             }
 
+        # Fetch the Farm Analytics report for the selected crop
+        from services.analytics_service import generate_farm_analytics
+        analytics_payload = generate_farm_analytics(
+            crop=crop, 
+            soil=data.get("soil", {}), 
+            climate=data.get("climate", {}), 
+            area=data.get("area", 1.0)
+        )
+
         logger.info(
             f"Financial Optimizer Selected: "
             f"Crop: {crop}, "
@@ -84,6 +93,7 @@ def decide_crop(data: dict) -> dict:
             "confidence": confidence,
             "estimated_yield": best_candidate.get("estimated_yield"),
             "financials": financials,
+            "analytics": analytics_payload,
             "source": "financial_optimization_engine",
             "model_version": ml_client.model_version,
             "reason": "ml_prediction"
