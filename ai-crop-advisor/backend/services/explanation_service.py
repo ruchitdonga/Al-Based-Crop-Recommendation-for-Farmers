@@ -11,9 +11,9 @@ class ExplanationService:
     def generate(self, crop, soil_ph, confidence=None, reason=None, last_crop=None, lang="en"):
         lang_names = {
             "en": "English",
-            "hi": "Hindi",
-            "mr": "Marathi",
-            "gu": "Gujarati"
+            "hi": "Hindi (in native Devanagari script, NOT English letters)",
+            "mr": "Marathi (in native Devanagari script, NOT English letters)",
+            "gu": "Gujarati (in native Gujarati script, NOT English letters)"
         }
         language = lang_names.get(lang, "English")
 
@@ -41,6 +41,8 @@ Tell the farmer in {language} why this crop is a fantastic choice for their soil
 Provide 1 or 2 practical tips for land preparation considering the previous crop or soil pH.
 Keep it extremely encouraging, highly respectful, and exactly 3 to 4 short sentences.
 Do NOT use markdown headers, asterisks, or bullet points. Speak naturally in plain text.
+
+CRITICAL INSTRUCTION: If requested to speak Hindi, Marathi, or Gujarati, you MUST reply entirely in the native writing script for that language (e.g., Devanagari). NEVER use the English/Latin alphabet.
 
 REPLY DIRECTLY TO THE FARMER IN {language}:
 """.strip()
