@@ -10,8 +10,8 @@ class LLMService:
         # Using Groq's shockingly fast and extremely reliable free Inference API
         self.url = "https://api.groq.com/openai/v1/chat/completions"
         self.api_key = os.getenv("GROQ_API_KEY")
-        # Back to Llama 3.3 70B! The 8B version hallucinates Marathi grammar. The 70B is vastly superior.
-        self.model = "llama-3.3-70b-versatile"
+        # Switching to Google's Gemma 2 9B! It is explicitly heavily trained on Indian languages and natively supports formal Marathi/Hindi without hallucinating "Hey brother".
+        self.model = "gemma2-9b-it"
 
     def reason_multilingual(self, prompt: str) -> str:
         try:
