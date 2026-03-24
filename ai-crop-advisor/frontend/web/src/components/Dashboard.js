@@ -133,9 +133,20 @@ function estimateProfitPerHectare({ crop, estimatedYield }) {
 function getProfitEstimate(item) {
     if (!item) return null;
 
+    // Preferred backend contract (new): recommendation.financials.net_profit_inr
+    const nestedFinancials =
+        toFiniteNumber(item.financials?.net_profit_inr) ??
+        toFiniteNumber(item.financials?.netProfitInr) ??
+        toFiniteNumber(item.financials?.net_profit) ??
+        toFiniteNumber(item.financials?.netProfit);
+
+    if (nestedFinancials !== null) return nestedFinancials;
+
     // Accept multiple possible backend field names
     const direct =
         toFiniteNumber(item.profit_estimate) ??
+        toFiniteNumber(item.net_profit_inr) ??
+        toFiniteNumber(item.netProfitInr) ??
         toFiniteNumber(item.estimated_profit) ??
         toFiniteNumber(item.profit) ??
         toFiniteNumber(item.profit_per_hectare) ??
