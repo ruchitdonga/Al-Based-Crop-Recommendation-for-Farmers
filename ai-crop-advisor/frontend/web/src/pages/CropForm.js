@@ -138,7 +138,7 @@ function CropForm() {
     }
 
     if (Object.keys(updates).length === 0) {
-      setVoiceError("No numbers detected. Try: Nitrogen 90, Phosphorus 40, Temperature 25");
+      setVoiceError(t("cropform.voice.noNumbersDetected"));
       return;
     }
 
@@ -162,7 +162,7 @@ function CropForm() {
     setVoiceError("");
 
     if (!canRecognize) {
-      setVoiceError("Speech recognition is not supported in this browser. Use Chrome.");
+      setVoiceError(t("voice.unsupported"));
       return;
     }
 
@@ -184,8 +184,8 @@ function CropForm() {
 
     rec.onerror = (event) => {
       const msg = event?.error
-        ? `Speech recognition error: ${event.error} `
-        : "Speech recognition error.";
+        ? `${t("voice.recognitionErrorPrefix")} ${event.error}`
+        : t("voice.recognitionError");
       setVoiceError(msg);
       setIsListening(false);
     };
@@ -231,7 +231,7 @@ function CropForm() {
     try {
       rec.start();
     } catch {
-      setVoiceError("Unable to start microphone. Check permissions and try again.");
+      setVoiceError(t("voice.micPermission"));
       setIsListening(false);
     }
   };
@@ -424,11 +424,11 @@ function CropForm() {
                 onClick={() => (isListening ? stopListening() : startListening())}
                 disabled={isLoading || !canRecognize}
                 aria-pressed={isListening}
-                aria-label={isListening ? "Stop listening" : "Start voice input"}
-                title={!canRecognize ? "Speech recognition requires Chrome" : undefined}
+                aria-label={isListening ? t("voice.micStop") : t("voice.micStart")}
+                title={!canRecognize ? t("voice.requiresChromeTitle") : undefined}
               >
                 <span aria-hidden="true">{isListening ? "■" : "🎤"}</span>
-                {isListening ? "Listening…" : "Speak"}
+                {isListening ? t("voice.listening") : t("cropform.voice.speak")}
               </button>
 
               <button
@@ -440,13 +440,13 @@ function CropForm() {
                 }}
                 disabled={isLoading || (!recognizedText && !voiceError)}
               >
-                Clear
+                {t("common.clear")}
               </button>
             </div>
 
             <div className="voiceBox" aria-live="polite">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div className="voiceBox__label">Recognized text</div>
+                <div className="voiceBox__label">{t("cropform.voice.recognizedText")}</div>
                 <AudioVisualizer isListening={isListening} />
               </div>
               <div className="voiceBox__text">{recognizedText || "—"}</div>
@@ -484,9 +484,9 @@ function CropForm() {
                       <div className="field__validationIcon">
                         {formData[f.name] !== "" ? (
                           Number.isFinite(Number(formData[f.name])) ? (
-                            <span className="icon-valid" title="Valid Input">✅</span>
+                            <span className="icon-valid" title={t("form.validation.validInput")}>✅</span>
                           ) : (
-                            <span className="icon-invalid" title="Invalid Number">❌</span>
+                            <span className="icon-invalid" title={t("form.validation.invalidNumberTitle")}>❌</span>
                           )
                         ) : null}
                       </div>
