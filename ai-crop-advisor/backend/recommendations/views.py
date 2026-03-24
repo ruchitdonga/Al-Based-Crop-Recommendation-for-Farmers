@@ -11,7 +11,7 @@ from .serializers import RecommendRequestSerializer, ChatRequestSerializer
 from services.decision_engine import decide_crop
 from services.explanation_service import ExplanationService
 from services.llm_service import LLMService
-from services.ml_client import MLClient
+from services.ml_client import get_ml_client
 from services.session_history import history_store
 
 
@@ -175,7 +175,7 @@ class ModelInfoView(APIView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.ml_client = MLClient()
+        self.ml_client = get_ml_client()
 
     @extend_schema(
         responses={200: dict},

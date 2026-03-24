@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from services.ml_client import MLClient
+from services.ml_client import get_ml_client
 
 CONFIDENCE_THRESHOLD = 0.5
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def decide_crop(data: dict) -> dict:
 
-    ml_client = MLClient()
+    ml_client = get_ml_client()
 
     try:
         features = {

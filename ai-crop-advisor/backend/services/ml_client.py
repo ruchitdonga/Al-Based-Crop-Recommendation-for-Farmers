@@ -6,6 +6,7 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+from functools import lru_cache
 
 
 class MLClient:
@@ -129,4 +130,9 @@ class MLClient:
             "model_version": self.model_version,
             "model_accuracy": self.accuracy
         }
+
+@lru_cache(maxsize=1)
+def get_ml_client() -> MLClient:
+    """Returns a globally cached instance of the MLClient to prevent reloading .pkl models on every request."""
+    return MLClient()
     

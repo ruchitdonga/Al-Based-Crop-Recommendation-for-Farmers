@@ -36,7 +36,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG is handled via os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ['*']
+# Production hosts should be comma-separated in the environment
+env_hosts = os.getenv("ALLOWED_HOSTS", "*")
+ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(",") if h.strip()] if env_hosts != "*" else ['*']
+
+# Strict CORS configuration
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL", "True") == "True"
+env_cors = os.getenv("CORS_ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = [o.strip() for o in env_cors.split(",") if o.strip()]
 
 
 # Application definition
@@ -52,6 +59,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'drf_spectacular',
+    'corsheaders',
 
     # Local
     'core',
@@ -62,6 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
