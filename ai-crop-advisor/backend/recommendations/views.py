@@ -65,7 +65,14 @@ class RecommendView(APIView):
         model_version = result.get("model_version")
         reason = result.get("reason", "unknown")
 
-        # STEP 4 — Explanation with confidence and reason awareness
+        # STEP 4 — Profit Estimation (New!)
+        financials = None
+        if estimated_yield is not None:
+            from services.profit_service import calculate_profit
+            area_ha = data.get("area", 1.0)
+            financials = calculate_profit(crop, estimated_yield, area_ha)
+
+        # STEP 5 — Explanation with confidence and reason awareness
         explanation = self.explanation_service.generate(
             crop=crop,
             soil_ph=soil["ph"],
@@ -80,12 +87,13 @@ class RecommendView(APIView):
         history_store.add(session_id, crop, confidence)
         history = history_store.get(session_id)
 
-        # STEP 6 — Final Response
+        # STEP 7 — Final Response
         return Response({
             "recommendation": {
                 "crop": crop,
                 "confidence": confidence,
                 "estimated_yield": estimated_yield,
+                "financials": financials,
             },
             "explanation": explanation,
             "source": source,
