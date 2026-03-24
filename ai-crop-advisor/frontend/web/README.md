@@ -2,6 +2,20 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Backend API configuration
+
+This frontend calls the backend via `src/api.js`.
+
+- Default API base URL: `https://ruchitd-ai-crop-backend.hf.space/api`
+- Override (recommended for deployments): set `REACT_APP_API_BASE_URL` at build time.
+
+Examples:
+
+- Use the Hugging Face backend explicitly:
+	- PowerShell: `$env:REACT_APP_API_BASE_URL='https://ruchitd-ai-crop-backend.hf.space/api'; npm start`
+- Use a CRA dev proxy (if you set one up) so calls go to `/api`:
+	- PowerShell: `$env:REACT_APP_API_BASE_URL='/api'; npm start`
+
 ## Available Scripts
 
 In the project directory, you can run:

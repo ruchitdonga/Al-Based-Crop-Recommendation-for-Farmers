@@ -1,7 +1,8 @@
 function getDefaultApiBaseUrl() {
-  // Default to the deployed Render backend. If you want local dev via CRA proxy,
-  // set `REACT_APP_API_BASE_URL=/api`.
-  return "https://ai-crop-backend-1j72.onrender.com/api";
+  // Default to the deployed Hugging Face Spaces backend.
+  // Override in dev/prod with `REACT_APP_API_BASE_URL`.
+  // Example: `REACT_APP_API_BASE_URL=/api` when using a CRA proxy.
+  return "https://ruchitd-ai-crop-backend.hf.space/api";
 }
 
 export const API_BASE_URL = (
