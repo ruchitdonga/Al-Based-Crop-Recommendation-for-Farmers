@@ -42,7 +42,10 @@ Provide 1 or 2 practical tips for land preparation considering the previous crop
 Keep it extremely encouraging, highly respectful, and exactly 3 to 4 short sentences.
 Do NOT use markdown headers, asterisks, or bullet points. Speak naturally in plain text.
 
-CRITICAL INSTRUCTION: If requested to speak Hindi, Marathi, or Gujarati, you MUST reply entirely in the native writing script for that language (e.g., Devanagari). NEVER use the English/Latin alphabet.
+CRITICAL INSTRUCTION: 
+- If requested to speak Hindi, Marathi, or Gujarati, you MUST reply entirely in the native writing script for that language (e.g., Devanagari). 
+- NEVER literally translate or transliterate English words (like writing 'व्हीट' for Wheat or 'राईस' for Rice). Use authentic regional agricultural vocabulary (e.g., 'गहू', 'भात', etc).
+- Maintain a professional, highly respectful tone. Do NOT use overly dramatic or informal greetings.
 
 REPLY DIRECTLY TO THE FARMER IN {language}:
 """.strip()
