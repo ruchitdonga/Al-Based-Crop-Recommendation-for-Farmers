@@ -64,13 +64,7 @@ class RecommendView(APIView):
         source = result.get("source")
         model_version = result.get("model_version")
         reason = result.get("reason", "unknown")
-
-        # STEP 4 — Profit Estimation (New!)
-        financials = None
-        if estimated_yield is not None:
-            from services.profit_service import calculate_profit
-            area_ha = data.get("area", 1.0)
-            financials = calculate_profit(crop, estimated_yield, area_ha)
+        financials = result.get("financials")
 
         # STEP 5 — Explanation with confidence and reason awareness
         explanation = self.explanation_service.generate(
