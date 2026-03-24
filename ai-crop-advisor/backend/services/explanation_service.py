@@ -1,112 +1,62 @@
 import logging
 from services.llm_service import LLMService
-from services.explanation_template import ExplanationTemplate
-
 
 logger = logging.getLogger(__name__)
-
 
 class ExplanationService:
 
     def __init__(self):
         self.llm = LLMService()
-        self.template = ExplanationTemplate()
-
-    def polish(self, text: str, lang: str):
-
-        prompt = f"""
-You are a text rewriter.
-
-Rewrite the text to improve fluency slightly.
-
-STRICT RULES:
-- Output ONLY the rewritten text.
-- Do NOT add explanations.
-- Do NOT add bullet points.
-- Do NOT add headers.
-- Do NOT mention what you changed.
-- Keep the same number of sentences.
-- Do not change numbers.
-- Do not add information.
-- Same language.
-
-TEXT:
-{text}
-
-FINAL OUTPUT (only rewritten text):
-""".strip()
-
-        response = self.llm.reason_multilingual(prompt)
-        cleaned = response.strip()
-
-        # Safety filter: keep only numbered explanation lines
-        lines = cleaned.splitlines()
-        valid_lines = [
-            line.strip()
-            for line in lines
-            if line.strip().startswith("1.") or line.strip().startswith("2.")
-        ]
-
-        if valid_lines:
-            return " ".join(valid_lines)
-
-        return cleaned
 
     def generate(self, crop, soil_ph, confidence=None, reason=None, last_crop=None, lang="en"):
-
-        base_text = self.template.build(
-            crop=crop,
-            soil_ph=soil_ph,
-            lang=lang
-        )
-
-        # Add context-aware message based on reason and confidence
-        reason_messages = {
-            "en": {
-                "low_confidence_fallback": " The model confidence was low, so a rule-based fallback recommendation was applied.",
-                "ml_error_fallback": " The ML system encountered an issue, so a fallback recommendation was provided.",
-                "ml_prediction_high": " The model is highly confident in this recommendation.",
-                "ml_prediction_moderate": " The model shows moderate confidence in this recommendation."
-            },
-            "hi": {
-                "low_confidence_fallback": " मॉडल का आत्मविश्वास कम था, इसलिए एक नियम-आधारित फ़ॉलबैक सिफारिश लागू की गई।",
-                "ml_error_fallback": " ML सिस्टम को एक समस्या का सामना करना पड़ा, इसलिए एक फ़ॉलबैक सिफारिश प्रदान की गई।",
-                "ml_prediction_high": " मॉडल इस सिफारिश में अत्यधिक आत्मविश्वासी है।",
-                "ml_prediction_moderate": " मॉडल इस सिफारिश में मध्यम आत्मविश्वास दिखाता है।"
-            },
-            "mr": {
-                "low_confidence_fallback": " मॉडेलचा आत्मविश्वास कमी होता, म्हणून नियम-आधारित फॉलबॅक शिफारस लागू केली गेली।",
-                "ml_error_fallback": " ML सिस्टमला समस्या आली, म्हणून फॉलबॅक शिफारस दिली गेली।",
-                "ml_prediction_high": " मॉडेल या सुचनेसाठी अत्यंत आत्मविश्वासी आहे।",
-                "ml_prediction_moderate": " मॉडेल या सुचनेसाठी मध्यम आत्मविश्वास दर्शविते।"
-            },
-            "gu": {
-                "low_confidence_fallback": " મોડેલનો આત્મવિશ્વાસ ઓછો હતો, તેથી નિયમ-આધારિત ફૉલબેક ભલામણ લાગુ કરવામાં આવી।",
-                "ml_error_fallback": " ML સિસ્ટમને સમસ્યાનો સામना કરવો પડ્યો, તેથી ફૉલબેક ભલામણ આપવામાં આવી।",
-                "ml_prediction_high": " મોડેલ આ ભલામણમાં અત્યંત આત્મવિશ્વાસી છે।",
-                "ml_prediction_moderate": " મોડેલ આ ભલામણમાં મધ્યમ આત્મવિશ્વાસ દર્શાવે છે।"
-            }
+        lang_names = {
+            "en": "English",
+            "hi": "Hindi",
+            "mr": "Marathi",
+            "gu": "Gujarati"
         }
+        language = lang_names.get(lang, "English")
 
-        messages = reason_messages.get(lang, reason_messages["en"])
+        confidence_context = ""
+        if confidence:
+            if confidence > 0.8:
+                confidence_context = "The AI model is highly confident in this recommendation based on local data."
+            elif confidence < 0.5:
+                confidence_context = "The soil data was unusual, so this is a highly safe, rule-based fallback recommendation."
+            else:
+                confidence_context = "The model is moderately confident in this crop."
 
-        # Determine additional message based on reason and confidence
-        additional_message = ""
+        prompt = f"""
+You are an expert AI Crop Advisor for Indian farmers.
+A farmer has requested a crop recommendation.
+Our backend Machine Learning models have analyzed their soil and climate data.
 
-        if reason == "low_confidence_fallback":
-            additional_message = messages["low_confidence_fallback"]
-        elif reason == "ml_error_fallback":
-            additional_message = messages["ml_error_fallback"]
-        elif reason == "ml_prediction":
-            if confidence is not None and confidence > 0.8:
-                additional_message = messages["ml_prediction_high"]
-            elif confidence is not None and confidence >= 0.5:
-                additional_message = messages["ml_prediction_moderate"]
+DATA:
+- Recommended Crop: {crop}
+- Soil pH: {soil_ph}
+- Previous Crop Grown: {last_crop if last_crop else 'None/Unknown'}
+- Confidence Note: {confidence_context}
 
-        base_text = f"{base_text}{additional_message}"
+Tell the farmer in {language} why this crop is a fantastic choice for their soil. 
+Provide 1 or 2 practical tips for land preparation considering the previous crop or soil pH.
+Keep it extremely encouraging, highly respectful, and exactly 3 to 4 short sentences.
+Do NOT use markdown headers, asterisks, or bullet points. Speak naturally in plain text.
+
+REPLY DIRECTLY TO THE FARMER IN {language}:
+""".strip()
 
         try:
-            return self.polish(base_text, lang)
+            raw_reply = self.llm.reason_multilingual(prompt)
+            # Clean up the output to ensure plain text
+            cleaned = raw_reply.replace("*", "").replace("#", "").strip()
+            
+            # If the LLM connection fails, llm_service prepends "📝"
+            if "📝" in cleaned and "(API Error" in cleaned:
+                raise Exception("LLM offline")
+                
+            return cleaned
         except Exception as e:
-            logger.error(f"LLM polish failed: {str(e)}")
-            return base_text
+            logger.error(f"LLM explanation generation failed: {str(e)}")
+            
+        # Extremely reliable static fallback if the cloud AI goes offline
+        return f"Based on your farm's soil pH of {soil_ph}, planting {crop} is highly recommended right now to maximize your yield!"
