@@ -10,8 +10,8 @@ class LLMService:
         # Using Groq's shockingly fast and extremely reliable free Inference API
         self.url = "https://api.groq.com/openai/v1/chat/completions"
         self.api_key = os.getenv("GROQ_API_KEY")
-        # Back to Llama 3.1! Groq hosts it natively without 'gated' Token 404 errors.
-        self.model = "llama-3.1-8b-instant"
+        # Back to Llama 3.3 70B! The 8B version hallucinates Marathi grammar. The 70B is vastly superior.
+        self.model = "llama-3.3-70b-versatile"
 
     def reason_multilingual(self, prompt: str) -> str:
         try:
