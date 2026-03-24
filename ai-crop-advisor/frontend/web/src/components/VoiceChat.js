@@ -162,8 +162,8 @@ export default function VoiceChat() {
 
     rec.onerror = (event) => {
       const msg = event?.error
-        ? `Speech recognition error: ${event.error}`
-        : "Speech recognition error.";
+        ? `${t("voice.recognitionErrorPrefix")} ${event.error}`
+        : t("voice.recognitionError");
       setError(msg);
       setIsListening(false);
     };
@@ -234,6 +234,15 @@ export default function VoiceChat() {
     if (!isLoading) sendUserMessage(input);
   };
 
+  // Keep the greeting aligned with active language.
+  useEffect(() => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === "m1" && m.role === "ai" ? { ...m, text: t("voice.greeting") } : m
+      )
+    );
+  }, [lang, t]);
+
   // Auto-scroll to latest message
   useEffect(() => {
     const el = listRef.current;
@@ -277,8 +286,8 @@ export default function VoiceChat() {
             </div>
           </div>
           <div style={styles.badges}>
-            <span style={styles.badge}>{canRecognize ? "STT" : "STT off"}</span>
-            <span style={styles.badge}>{canSpeak ? "TTS" : "TTS off"}</span>
+            <span style={styles.badge}>{canRecognize ? t("voice.sttOn") : t("voice.sttOff")}</span>
+            <span style={styles.badge}>{canSpeak ? t("voice.ttsOn") : t("voice.ttsOff")}</span>
           </div>
         </div>
 
@@ -312,7 +321,7 @@ export default function VoiceChat() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={t("voice.placeholder")}
             style={styles.input}
-            aria-label="Message"
+            aria-label={t("voice.messageLabel")}
           />
 
           <button
@@ -326,7 +335,7 @@ export default function VoiceChat() {
             disabled={!canRecognize}
             aria-pressed={isListening}
             aria-label={isListening ? t("voice.micStop") : t("voice.micStart")}
-            title={!canRecognize ? "Speech recognition requires Chrome" : undefined}
+            title={!canRecognize ? t("voice.requiresChromeTitle") : undefined}
           >
             {isListening ? "■" : "🎤"}
           </button>

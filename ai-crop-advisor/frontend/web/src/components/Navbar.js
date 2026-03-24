@@ -23,13 +23,13 @@ const Navbar = () => {
           <span role="img" aria-label="leaf" className="navLogo__icon">
             🌿
           </span>
-          CropAdvisor
+          {t("nav.cropAdvisor")}
         </Link>
 
         <button
           className={`mobileMenuBtn ${isMobileMenuOpen ? 'mobileMenuBtn--open' : ''}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle navigation"
+          aria-label={t("nav.toggleNavigation")}
         >
           <span></span>
           <span></span>
@@ -38,10 +38,10 @@ const Navbar = () => {
 
         <div className={`navLinks ${isMobileMenuOpen ? 'navLinks--open' : ''}`}>
           <Link to="/features" className={getLinkClass("/features")} onClick={closeMenu}>
-            Features
+            {t("nav.features")}
           </Link>
           <Link to="/how-it-works" className={getLinkClass("/how-it-works")} onClick={closeMenu}>
-            How it Works
+            {t("nav.howItWorks")}
           </Link>
           <Link to="/predict" className={getLinkClass("/predict")} onClick={closeMenu}>
             {t("nav.cropAdvisor")}
@@ -58,7 +58,7 @@ const Navbar = () => {
                 setLanguage(e.target.value);
                 closeMenu();
               }}
-              aria-label="Select Language"
+              aria-label={t("nav.selectLanguage")}
             >    {LANGS.map((l) => (
               <option key={l.value} value={l.value}>
                 {l.label}
