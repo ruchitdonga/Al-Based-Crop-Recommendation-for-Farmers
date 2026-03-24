@@ -27,27 +27,21 @@ class ExplanationService:
                 confidence_context = "The model is moderately confident in this crop."
 
         prompt = f"""
-You are an expert AI Crop Advisor for Indian farmers.
-A farmer has requested a crop recommendation.
-Our backend Machine Learning models have analyzed their soil and climate data.
+You are an AI agricultural assistant. Output exactly 3 sentences in {language}. 
+No greetings, no pleasantries, no conversational filler. Do not use words like 'अरे', 'नमस्कार', or 'मित्रा'.
+Start immediately with the recommendation.
 
-DATA:
-- Recommended Crop: {crop}
-- Soil pH: {soil_ph}
-- Previous Crop Grown: {last_crop if last_crop else 'None/Unknown'}
-- Confidence Note: {confidence_context}
+FACTS TO INCLUDE:
+1. Recommend {crop} as an excellent choice for their field.
+2. Explain briefly that a soil pH of {soil_ph} is ideal for {crop}.
+3. Provide one technical land preparation tip considering they previously grew {last_crop if last_crop else 'nothing'}.
 
-Tell the farmer in {language} why this crop is a fantastic choice for their soil. 
-Provide 1 or 2 practical tips for land preparation considering the previous crop or soil pH.
-Keep it extremely encouraging, highly respectful, and exactly 3 to 4 short sentences.
-Do NOT use markdown headers, asterisks, or bullet points. Speak naturally in plain text.
+RULES:
+- Use formal, standard agricultural vocabulary (e.g., 'प्रमाण मराठी', 'शुद्ध हिंदी').
+- Use the native script (Devanagari, Gujarati script). Do not use English characters.
+- Translate crop names properly (e.g., 'गहू' for Wheat, 'भात' or 'तांदूळ' for Rice).
 
-CRITICAL INSTRUCTION: 
-- If requested to speak Hindi, Marathi, or Gujarati, you MUST reply entirely in the native writing script for that language (e.g., Devanagari). 
-- Use strictly formal, highly professional agricultural language (e.g., 'प्रमाण मराठी' for Marathi, 'शुद्ध हिंदी' for Hindi). 
-- NEVER use casual greetings like 'अरे', 'भाई', or 'Hello'. NEVER transliterate English words (like writing 'व्हीट' instead of 'गहू').
-
-REPLY DIRECTLY TO THE FARMER IN {language}:
+OUTPUT (3 SENTENCES IN {language}):
 """.strip()
 
         try:
