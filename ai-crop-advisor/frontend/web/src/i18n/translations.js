@@ -59,11 +59,25 @@ export const translations = {
     "field.ph": "Soil pH",
     "field.last_crop": "Last crop (optional)",
 
+    "field.state": "State",
+    "field.season": "Season",
+    "field.area": "Area (hectare)",
+    "field.pesticide": "Pesticide",
+    "field.crop_year": "Crop year",
+
+    "season.kharif": "Kharif",
+    "season.rabi": "Rabi",
+    "season.zaid": "Zaid",
+
     "placeholder.num": "e.g. 60",
     "placeholder.temp": "e.g. 26",
     "placeholder.humidity": "e.g. 70",
     "placeholder.rainfall": "e.g. 110",
     "placeholder.ph": "e.g. 6.8",
+    "placeholder.state": "e.g. Maharashtra",
+    "placeholder.area": "e.g. 2.5",
+    "placeholder.pesticide": "e.g. 25",
+    "placeholder.crop_year": "e.g. 2024",
     "placeholder.last_crop": "e.g. Rice",
 
     "result.recommended": "Recommended Crop",
@@ -256,11 +270,25 @@ export const translations = {
     "field.ph": "मिट्टी pH",
     "field.last_crop": "पिछली फसल (वैकल्पिक)",
 
+    "field.state": "राज्य",
+    "field.season": "मौसम",
+    "field.area": "क्षेत्र (हेक्टेयर)",
+    "field.pesticide": "कीटनाशक",
+    "field.crop_year": "फसल वर्ष",
+
+    "season.kharif": "खरीफ",
+    "season.rabi": "रबी",
+    "season.zaid": "जायद",
+
     "placeholder.num": "उदा. 60",
     "placeholder.temp": "उदा. 26",
     "placeholder.humidity": "उदा. 70",
     "placeholder.rainfall": "उदा. 110",
     "placeholder.ph": "उदा. 6.8",
+    "placeholder.state": "उदा. महाराष्ट्र",
+    "placeholder.area": "उदा. 2.5",
+    "placeholder.pesticide": "उदा. 25",
+    "placeholder.crop_year": "उदा. 2024",
     "placeholder.last_crop": "उदा. धान",
 
     "result.recommended": "अनुशंसित फसल",
@@ -453,11 +481,25 @@ export const translations = {
     "field.ph": "माती pH",
     "field.last_crop": "मागील पीक (ऐच्छिक)",
 
+    "field.state": "राज्य",
+    "field.season": "हंगाम",
+    "field.area": "क्षेत्र (हेक्टर)",
+    "field.pesticide": "कीटकनाशक",
+    "field.crop_year": "पीक वर्ष",
+
+    "season.kharif": "खरीप",
+    "season.rabi": "रबी",
+    "season.zaid": "झायद",
+
     "placeholder.num": "उदा. 60",
     "placeholder.temp": "उदा. 26",
     "placeholder.humidity": "उदा. 70",
     "placeholder.rainfall": "उदा. 110",
     "placeholder.ph": "उदा. 6.8",
+    "placeholder.state": "उदा. महाराष्ट्र",
+    "placeholder.area": "उदा. 2.5",
+    "placeholder.pesticide": "उदा. 25",
+    "placeholder.crop_year": "उदा. 2024",
     "placeholder.last_crop": "उदा. भात",
 
     "result.recommended": "शिफारस केलेले पीक",
@@ -650,11 +692,25 @@ export const translations = {
     "field.ph": "માટી pH",
     "field.last_crop": "પાછલી પાક (વૈકલ્પિક)",
 
+    "field.state": "રાજ્ય",
+    "field.season": "મોસમ",
+    "field.area": "વિસ્તાર (હેક્ટર)",
+    "field.pesticide": "કીટનાશક",
+    "field.crop_year": "પાક વર્ષ",
+
+    "season.kharif": "ખરીફ",
+    "season.rabi": "રબી",
+    "season.zaid": "ઝાયદ",
+
     "placeholder.num": "ઉદા. 60",
     "placeholder.temp": "ઉદા. 26",
     "placeholder.humidity": "ઉદા. 70",
     "placeholder.rainfall": "ઉદા. 110",
     "placeholder.ph": "ઉદા. 6.8",
+    "placeholder.state": "ઉદા. મહારાષ્ટ્ર",
+    "placeholder.area": "ઉદા. 2.5",
+    "placeholder.pesticide": "ઉદા. 25",
+    "placeholder.crop_year": "ઉદા. 2024",
     "placeholder.last_crop": "ઉદા. ધાન",
 
     "result.recommended": "ભલામણ કરેલો પાક",

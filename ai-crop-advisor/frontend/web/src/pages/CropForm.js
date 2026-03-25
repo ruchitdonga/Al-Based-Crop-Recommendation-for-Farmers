@@ -17,6 +17,11 @@ function CropForm() {
     humidity: "",
     rainfall: "",
     ph: "",
+    state: "Maharashtra",
+    season: "Kharif",
+    area: "1.0",
+    pesticide: "0.0",
+    crop_year: "2024",
     last_crop: "",
   });
 
@@ -67,6 +72,20 @@ function CropForm() {
       { name: "humidity", label: t("field.humidity"), placeholder: t("placeholder.humidity"), type: "number" },
       { name: "rainfall", label: t("field.rainfall"), placeholder: t("placeholder.rainfall"), type: "number" },
       { name: "ph", label: t("field.ph"), placeholder: t("placeholder.ph"), type: "number", step: "0.1" },
+      { name: "state", label: t("field.state"), placeholder: t("placeholder.state"), type: "text" },
+      {
+        name: "season",
+        label: t("field.season"),
+        type: "select",
+        options: [
+          { value: "Kharif", label: t("season.kharif") },
+          { value: "Rabi", label: t("season.rabi") },
+          { value: "Zaid", label: t("season.zaid") },
+        ],
+      },
+      { name: "area", label: t("field.area"), placeholder: t("placeholder.area"), type: "number", step: "0.01" },
+      { name: "pesticide", label: t("field.pesticide"), placeholder: t("placeholder.pesticide"), type: "number", step: "0.1" },
+      { name: "crop_year", label: t("field.crop_year"), placeholder: t("placeholder.crop_year"), type: "number" },
       { name: "last_crop", label: t("field.last_crop"), placeholder: t("placeholder.last_crop"), type: "text" },
     ],
     [t]
@@ -79,8 +98,11 @@ function CropForm() {
       K: { min: 0, max: 205 },
       temperature: { min: -10, max: 60 },
       humidity: { min: 0, max: 100 },
-      rainfall: { min: 0, max: 300 },
+      rainfall: { min: 0, max: 500 },
       ph: { min: 0, max: 14 },
+      area: { min: 0.01, max: 50 },
+      pesticide: { min: 0, max: 100 },
+      crop_year: { min: 1900, max: 2100 },
     }),
     []
   );
@@ -301,7 +323,7 @@ function CropForm() {
 
   // Validation: backend requires full soil/climate numeric input.
   const validate = () => {
-    const requiredNumeric = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph"];
+    const requiredNumeric = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph", "area", "pesticide", "crop_year"];
 
     for (const key of requiredNumeric) {
       const raw = String(formData[key]).trim();
@@ -313,6 +335,12 @@ function CropForm() {
         return { ok: false, message: t("form.validation.number") };
       }
     }
+
+    const state = String(formData.state ?? "").trim();
+    if (!state) return { ok: false, message: t("form.validation.required") };
+
+    const season = String(formData.season ?? "").trim();
+    if (!season) return { ok: false, message: t("form.validation.required") };
 
     return { ok: true, message: "" };
   };
@@ -349,6 +377,11 @@ function CropForm() {
             humidity: Number(String(formData.humidity).trim()),
             rainfall: Number(String(formData.rainfall).trim()),
           },
+          state: String(formData.state).trim(),
+          season: String(formData.season).trim(),
+          area: Number(String(formData.area).trim()),
+          pesticide: Number(String(formData.pesticide).trim()),
+          crop_year: Math.trunc(Number(String(formData.crop_year).trim())),
           lang,
         };
 
@@ -464,7 +497,21 @@ function CropForm() {
             {fields.map((f) => (
               <motion.label key={f.name} className="field" variants={fadeUp}>
                 <span className="field__label">{f.label}</span>
-                {f.type === "number" ? (
+                {f.type === "select" ? (
+                  <select
+                    className="field__input"
+                    name={f.name}
+                    value={formData[f.name]}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  >
+                    {(f.options || []).map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : f.type === "number" ? (
                   <>
                     <div className="field__inputWrap">
                       <input

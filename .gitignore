@@ -13,3 +13,5 @@ node_modules/
 
 # Frontend build output (generated)
 ai-crop-advisor/frontend/web/build/
+.vercel
+.env*.local

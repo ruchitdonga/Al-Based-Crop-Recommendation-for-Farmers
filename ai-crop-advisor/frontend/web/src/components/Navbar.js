@@ -1,12 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { LANGS } from "../i18n/translations";
+import logo from "../assets/logo.png";
 
 const Navbar = () => {
   const { lang, setLanguage, t } = useLanguage();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const langMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setIsLangMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const getLinkClass = (path) => {
     return location.pathname === path ? "navLink navLink--active" : "navLink";
@@ -20,9 +33,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar__container">
         <Link to="/" className="navLogo" onClick={closeMenu}>
-          <span role="img" aria-label="leaf" className="navLogo__icon">
-            🌿
-          </span>
+          <img src={logo} alt="AI Crop Advisor Logo" className="navLogo__img" />
           {t("nav.cropAdvisor")}
         </Link>
 
@@ -50,21 +61,34 @@ const Navbar = () => {
             {t("nav.voiceChat")}
           </Link>
 
-          <div className="langPicker">
-            <select
-              className="langPicker__select"
-              value={lang}
-              onChange={(e) => {
-                setLanguage(e.target.value);
-                closeMenu();
-              }}
-              aria-label={t("nav.selectLanguage")}
-            >    {LANGS.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label}
-              </option>
-            ))}
-            </select>
+          <div className="langPicker" ref={langMenuRef}>
+            <button
+              className={`langPicker__btn ${isLangMenuOpen ? 'langPicker__btn--active' : ''}`}
+              onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+              aria-expanded={isLangMenuOpen}
+              aria-label={t("nav.selectLanguage") || "Select Language"}
+            >
+              {LANGS.find(l => l.value === lang)?.label || "English"}
+            </button>
+
+            {isLangMenuOpen && (
+              <ul className="langPicker__menu">
+                {LANGS.map((l) => (
+                  <li key={l.value}>
+                    <button
+                      className={`langPicker__option ${lang === l.value ? 'langPicker__option--selected' : ''}`}
+                      onClick={() => {
+                        setLanguage(l.value);
+                        setIsLangMenuOpen(false);
+                        closeMenu();
+                      }}
+                    >
+                      {l.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
