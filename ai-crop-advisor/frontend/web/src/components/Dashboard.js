@@ -167,6 +167,12 @@ function formatInr(value, numberLocale) {
     return `₹${Math.round(n).toLocaleString(numberLocale)}`;
 }
 
+function formatNumber(value, numberLocale, options) {
+    const n = toFiniteNumber(value);
+    if (n === null) return "—";
+    return n.toLocaleString(numberLocale, options);
+}
+
 function ConfidenceBar({ value = 0, label, size = "lg" }) {
     const pct = Math.round(Math.min(1, Math.max(0, value)) * 100);
     const hue = value >= 0.7 ? 142 : value >= 0.4 ? 45 : 0;
@@ -259,69 +265,6 @@ function ProfitChart({ items = [], label }) {
     );
 }
 
-const SUST_RATINGS = {
-    low: { angle: -60, color: "hsl(0, 72%, 52%)" },
-    medium: { angle: 0, color: "hsl(45, 85%, 52%)" },
-    high: { angle: 60, color: "hsl(142, 72%, 48%)" },
-};
-
-function SustainabilityGauge({ rating = "medium", label }) {
-    const { t } = useLanguage();
-    const normalized = normalizeTriLevel(rating, "medium");
-    const r = SUST_RATINGS[normalized] || SUST_RATINGS.medium;
-    const valueKey = `sust.${normalized}`;
-    const valueLabel = t(valueKey);
-
-    const R = 52;
-    const CX = 60;
-    const CY = 58;
-    const SW = 10;
-
-    const pt = (deg) => {
-        const rad = (Math.PI * deg) / 180;
-        return { x: CX + R * Math.cos(Math.PI - rad), y: CY - R * Math.sin(Math.PI - rad) };
-    };
-
-    const arc = (startDeg, endDeg) => {
-        const s = pt(startDeg);
-        const e = pt(endDeg);
-        const large = endDeg - startDeg > 180 ? 1 : 0;
-        return `M ${s.x} ${s.y} A ${R} ${R} 0 ${large} 1 ${e.x} ${e.y}`;
-    };
-
-    const needleEnd = pt(90 + r.angle);
-
-    return (
-        <div className="gauge">
-            {label && <span className="gauge__label">{label}</span>}
-            <svg viewBox="0 0 120 68" className="gauge__svg" aria-hidden="true">
-                <path d={arc(0, 60)} stroke="hsl(0, 72%, 52%)" strokeWidth={SW} fill="none" opacity={0.25} strokeLinecap="round" />
-                <path d={arc(60, 120)} stroke="hsl(45, 85%, 52%)" strokeWidth={SW} fill="none" opacity={0.25} strokeLinecap="round" />
-                <path d={arc(120, 180)} stroke="hsl(142, 72%, 48%)" strokeWidth={SW} fill="none" opacity={0.25} strokeLinecap="round" />
-
-                {normalized === "low" && <path d={arc(0, 60)} stroke="hsl(0, 72%, 52%)" strokeWidth={SW} fill="none" strokeLinecap="round" />}
-                {normalized === "medium" && <path d={arc(60, 120)} stroke="hsl(45, 85%, 52%)" strokeWidth={SW} fill="none" strokeLinecap="round" />}
-                {normalized === "high" && <path d={arc(120, 180)} stroke="hsl(142, 72%, 48%)" strokeWidth={SW} fill="none" strokeLinecap="round" />}
-
-                <motion.line
-                    x1={CX} y1={CY}
-                    x2={needleEnd.x} y2={needleEnd.y}
-                    stroke={r.color}
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                />
-                <circle cx={CX} cy={CY} r={3.5} fill={r.color} />
-            </svg>
-            <div className="gauge__value" style={{ color: r.color }}>
-                {valueLabel === valueKey ? normalized : valueLabel}
-            </div>
-        </div>
-    );
-}
-
 /**
  * Dashboard — professional advisory view shown after a recommendation.
  *
@@ -336,6 +279,9 @@ export default function Dashboard({ result }) {
 
     const recRaw = result.recommendation;
     const altsRaw = result.alternatives || [];
+
+    const analytics = result.analytics || {};
+    const pestAlerts = Array.isArray(analytics.pest_alerts) ? analytics.pest_alerts : [];
 
     const rec = {
         ...recRaw,
@@ -377,7 +323,7 @@ export default function Dashboard({ result }) {
                 <span className="dashboard__heroLabel">{t("dashboard.recommended")}</span>
                 <h2 className="dashboard__cropName">{translateCropName(t, rec.crop)}</h2>
                 <div className="dashboard__heroBadges">
-                    <RiskBadge level={rec.risk} />
+                    {rec.risk ? <RiskBadge level={rec.risk} /> : null}
                     {result.source && (
                         <span className="dashboard__srcBadge">{result.source}</span>
                     )}
@@ -395,12 +341,13 @@ export default function Dashboard({ result }) {
                     />
                 </div>
 
-                {/* Sustainability */}
+                {/* Estimated Yield */}
                 <div className="dashboard__metricCard">
-                    <SustainabilityGauge
-                        rating={rec.sustainability}
-                        label={t("dashboard.sustainability")}
-                    />
+                    <span className="dashboard__metricLabel">{t("dashboard.yield")}</span>
+                    <span className="dashboard__profitValue">
+                        {formatNumber(rec.estimated_yield, numberLocale, { maximumFractionDigits: 2 })}
+                        <span className="dashboard__profitUnit"> {t("dashboard.tonnes")}</span>
+                    </span>
                 </div>
 
                 {/* Profit */}
@@ -408,10 +355,98 @@ export default function Dashboard({ result }) {
                     <span className="dashboard__metricLabel">{t("dashboard.profit")}</span>
                     <span className="dashboard__profitValue">
                         {formatInr(rec.profit_estimate, numberLocale)}
-                        <span className="dashboard__profitUnit"> / {t("dashboard.hectare")}</span>
                     </span>
                 </div>
             </motion.div>
+
+            {/* ── Financial Breakdown ─────── */}
+            {rec.financials && (
+                <motion.div className="dashboard__alts" variants={fadeUp}>
+                    <span className="dashboard__altsTitle">{t("dashboard.financials")}</span>
+                    <div className="dashboard__altGrid">
+                        <div className="dashboard__altCard">
+                            <span className="dashboard__metricLabel">{t("dashboard.revenue")}</span>
+                            <div className="dashboard__altCrop">{formatInr(rec.financials.gross_revenue_inr, numberLocale)}</div>
+                        </div>
+                        <div className="dashboard__altCard">
+                            <span className="dashboard__metricLabel">{t("dashboard.cost")}</span>
+                            <div className="dashboard__altCrop">{formatInr(rec.financials.estimated_cost_inr, numberLocale)}</div>
+                        </div>
+                        <div className="dashboard__altCard">
+                            <span className="dashboard__metricLabel">{t("dashboard.mspUsed")}</span>
+                            <div className="dashboard__altCrop">{formatInr(rec.financials.msp_per_quintal_used, numberLocale)}</div>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* ── Analytics ───────────────── */}
+            {(analytics.kcc_loan || analytics.fertilizer || analytics.irrigation) && (
+                <motion.div className="dashboard__alts" variants={fadeUp}>
+                    <span className="dashboard__altsTitle">{t("dashboard.analytics")}</span>
+                    <div className="dashboard__altGrid">
+                        {analytics.kcc_loan && (
+                            <div className="dashboard__altCard">
+                                <span className="dashboard__metricLabel">{t("dashboard.kccLoan")}</span>
+                                <div className="dashboard__altCrop">{formatInr(analytics.kcc_loan.total_first_year_limit_inr, numberLocale)}</div>
+                                <div className="dashboard__altMeta">
+                                    <span>{t("dashboard.kccScale")}</span>
+                                    <span>{formatInr(analytics.kcc_loan.scale_of_finance_per_ha, numberLocale)}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {analytics.fertilizer && (
+                            <div className="dashboard__altCard">
+                                <span className="dashboard__metricLabel">{t("dashboard.fertilizer")}</span>
+                                <div className="dashboard__altCrop">{formatInr(analytics.fertilizer.estimated_cost_inr, numberLocale)}</div>
+                                {analytics.fertilizer.bags_required && (
+                                    <div className="dashboard__altMeta" style={{ justifyContent: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                                        <span>{t("dashboard.fertilizerBags")}:</span>
+                                        <span>
+                                            {t("dashboard.urea")} {formatNumber(analytics.fertilizer.bags_required.urea_45kg, numberLocale, { maximumFractionDigits: 1 })}
+                                        </span>
+                                        <span>
+                                            {t("dashboard.dap")} {formatNumber(analytics.fertilizer.bags_required.dap_50kg, numberLocale, { maximumFractionDigits: 1 })}
+                                        </span>
+                                        <span>
+                                            {t("dashboard.mop")} {formatNumber(analytics.fertilizer.bags_required.mop_50kg, numberLocale, { maximumFractionDigits: 1 })}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {analytics.irrigation && (
+                            <div className="dashboard__altCard">
+                                <span className="dashboard__metricLabel">{t("dashboard.irrigation")}</span>
+                                <div className="dashboard__altMeta">
+                                    <span>{t("dashboard.waterDeficit")}</span>
+                                    <span>{formatNumber(analytics.irrigation.deficit_mm, numberLocale, { maximumFractionDigits: 0 })} mm</span>
+                                </div>
+                                <div className="dashboard__altMeta">
+                                    <span>{t("dashboard.extraWater")}</span>
+                                    <span>
+                                        {formatNumber(analytics.irrigation.extra_liters_required, numberLocale, { maximumFractionDigits: 0 })} {t("dashboard.liters")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+            )}
+
+            {/* ── Pest Alerts ─────────────── */}
+            {pestAlerts.length > 0 && (
+                <motion.div className="dashboard__explanation" variants={fadeUp}>
+                    <span className="dashboard__explanationLabel">{t("dashboard.alerts")}</span>
+                    <div className="dashboard__explanationText">
+                        {pestAlerts.map((a, idx) => (
+                            <p key={idx} style={{ margin: idx === 0 ? 0 : "10px 0 0" }}>{a}</p>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
 
             {/* ── Profit Comparison Chart ──── */}
             {allCrops.length > 1 && (
@@ -437,19 +472,23 @@ export default function Dashboard({ result }) {
                             >
                                 <div className="dashboard__altHeader">
                                     <span className="dashboard__altCrop">{translateCropName(t, alt.crop)}</span>
-                                    <RiskBadge level={alt.risk} />
+                                    {alt.risk !== null && alt.risk !== undefined && `${alt.risk}`.trim() !== "" ? (
+                                        <RiskBadge level={alt.risk} />
+                                    ) : null}
                                 </div>
                                 <ConfidenceBar value={alt.confidence} size="sm" />
                                 <div className="dashboard__altMeta">
                                     <span>{formatInr(alt.profit_estimate, numberLocale)}</span>
-                                    <span className={`dashboard__sustTag dashboard__sustTag--${normalizeTriLevel(alt.sustainability, "medium")}`}>
-                                        {(() => {
-                                            const normalized = normalizeTriLevel(alt.sustainability, "medium");
-                                            const key = `sust.${normalized}`;
-                                            const label = t(key);
-                                            return label === key ? normalized : label;
-                                        })()}
-                                    </span>
+                                    {alt.sustainability !== null && alt.sustainability !== undefined && `${alt.sustainability}`.trim() !== "" ? (
+                                        <span className={`dashboard__sustTag dashboard__sustTag--${normalizeTriLevel(alt.sustainability, "medium")}`}>
+                                            {(() => {
+                                                const normalized = normalizeTriLevel(alt.sustainability, "medium");
+                                                const key = `sust.${normalized}`;
+                                                const label = t(key);
+                                                return label === key ? normalized : label;
+                                            })()}
+                                        </span>
+                                    ) : null}
                                 </div>
                             </motion.div>
                         ))}
@@ -462,6 +501,29 @@ export default function Dashboard({ result }) {
                 <motion.div className="dashboard__explanation" variants={fadeUp}>
                     <span className="dashboard__explanationLabel">{t("dashboard.explanation")}</span>
                     <p className="dashboard__explanationText">{result.explanation}</p>
+                </motion.div>
+            )}
+
+            {/* ── History ─────────────────── */}
+            {Array.isArray(result.history) && result.history.length > 0 && (
+                <motion.div className="dashboard__alts" variants={fadeUp}>
+                    <span className="dashboard__altsTitle">{t("dashboard.history")}</span>
+                    <div className="dashboard__altGrid">
+                        {result.history.slice(0, 6).map((h) => (
+                            <div key={h.timestamp || `${h.crop}-${h.confidence}`} className="dashboard__altCard">
+                                <div className="dashboard__altHeader">
+                                    <span className="dashboard__altCrop">{translateCropName(t, h.crop)}</span>
+                                </div>
+                                <ConfidenceBar value={h.confidence} size="sm" />
+                                {h.timestamp ? (
+                                    <div className="dashboard__altMeta">
+                                        <span>{t("dashboard.timestamp")}</span>
+                                        <span>{h.timestamp}</span>
+                                    </div>
+                                ) : null}
+                            </div>
+                        ))}
+                    </div>
                 </motion.div>
             )}
         </motion.div>
