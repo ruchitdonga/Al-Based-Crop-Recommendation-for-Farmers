@@ -49,13 +49,8 @@ function toFiniteNumber(value) {
 function normalizeCropNameForLookup(cropName) {
     return (cropName ?? "").toString().trim().toLowerCase();
 }
-
-// Very lightweight heuristic profit estimator (₹/hectare)
-// Used only when backend doesn't provide `profit_estimate`.
 function estimateProfitPerHectare({ crop, estimatedYield }) {
     const cropKey = normalizeCropNameForLookup(crop);
-
-    // Typical farmgate price estimates (₹/kg)
     const PRICE_PER_KG = {
         rice: 22,
         paddy: 22,
@@ -73,8 +68,6 @@ function estimateProfitPerHectare({ crop, estimatedYield }) {
         onion: 18,
         sugarcane: 3,
     };
-
-    // Typical cost of cultivation (₹/hectare)
     const COST_PER_HA = {
         rice: 50000,
         paddy: 50000,
@@ -92,8 +85,6 @@ function estimateProfitPerHectare({ crop, estimatedYield }) {
         onion: 65000,
         sugarcane: 90000,
     };
-
-    // Typical yields (kg/hectare) used only when ML doesn't return yield
     const TYPICAL_YIELD_KG_PER_HA = {
         rice: 4000,
         paddy: 4000,
@@ -118,7 +109,6 @@ function estimateProfitPerHectare({ crop, estimatedYield }) {
     const yieldValue = toFiniteNumber(estimatedYield);
     let yieldKgPerHa;
     if (yieldValue !== null) {
-        // Heuristic: most crop yields are either tonnes/ha (<200) or kg/ha (>=200)
         yieldKgPerHa = yieldValue >= 200 ? yieldValue : yieldValue * 1000;
     } else {
         yieldKgPerHa = TYPICAL_YIELD_KG_PER_HA[cropKey] ?? 3000;
@@ -126,14 +116,11 @@ function estimateProfitPerHectare({ crop, estimatedYield }) {
 
     const revenue = yieldKgPerHa * pricePerKg;
     const profit = revenue - costPerHa;
-    // Don't show negative profits as a huge negative number in UI
     return Math.max(0, Math.round(profit));
 }
 
 function getProfitEstimate(item) {
     if (!item) return null;
-
-    // Preferred backend contract (new): recommendation.financials.net_profit_inr
     const nestedFinancials =
         toFiniteNumber(item.financials?.net_profit_inr) ??
         toFiniteNumber(item.financials?.netProfitInr) ??
@@ -141,8 +128,6 @@ function getProfitEstimate(item) {
         toFiniteNumber(item.financials?.netProfit);
 
     if (nestedFinancials !== null) return nestedFinancials;
-
-    // Accept multiple possible backend field names
     const direct =
         toFiniteNumber(item.profit_estimate) ??
         toFiniteNumber(item.net_profit_inr) ??
@@ -265,12 +250,6 @@ function ProfitChart({ items = [], label }) {
     );
 }
 
-/**
- * Dashboard — professional advisory view shown after a recommendation.
- *
- * Props:
- *   result — full API response from /api/recommend/
- */
 export default function Dashboard({ result }) {
     const { lang, t } = useLanguage();
     const numberLocale = getNumberLocale(lang);
@@ -292,7 +271,6 @@ export default function Dashboard({ result }) {
         profit_estimate: getProfitEstimate(alt),
     }));
 
-    /* Merge primary + alternatives for the profit chart */
     const allCrops = [
         { crop: rec.crop, profit_estimate: rec.profit_estimate, confidence: rec.confidence },
         ...alts,
@@ -318,7 +296,6 @@ export default function Dashboard({ result }) {
             initial="hidden"
             animate="show"
         >
-            {/* ── Hero Card ─────────────────── */}
             <motion.div className="dashboard__hero" variants={fadeUp}>
                 <span className="dashboard__heroLabel">{t("dashboard.recommended")}</span>
                 <h2 className="dashboard__cropName">{translateCropName(t, rec.crop)}</h2>
@@ -330,9 +307,7 @@ export default function Dashboard({ result }) {
                 </div>
             </motion.div>
 
-            {/* ── Metrics Row ───────────────── */}
             <motion.div className="dashboard__metrics" variants={fadeUp}>
-                {/* Confidence */}
                 <div className="dashboard__metricCard">
                     <ConfidenceBar
                         value={rec.confidence}
@@ -341,7 +316,6 @@ export default function Dashboard({ result }) {
                     />
                 </div>
 
-                {/* Estimated Yield */}
                 <div className="dashboard__metricCard">
                     <span className="dashboard__metricLabel">{t("dashboard.yield")}</span>
                     <span className="dashboard__profitValue">
@@ -350,7 +324,6 @@ export default function Dashboard({ result }) {
                     </span>
                 </div>
 
-                {/* Profit */}
                 <div className="dashboard__metricCard dashboard__metricCard--profit">
                     <span className="dashboard__metricLabel">{t("dashboard.profit")}</span>
                     <span className="dashboard__profitValue">
@@ -359,7 +332,6 @@ export default function Dashboard({ result }) {
                 </div>
             </motion.div>
 
-            {/* ── Financial Breakdown ─────── */}
             {rec.financials && (
                 <motion.div className="dashboard__alts" variants={fadeUp}>
                     <span className="dashboard__altsTitle">{t("dashboard.financials")}</span>
@@ -380,7 +352,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── Analytics ───────────────── */}
             {(analytics.kcc_loan || analytics.fertilizer || analytics.irrigation) && (
                 <motion.div className="dashboard__alts" variants={fadeUp}>
                     <span className="dashboard__altsTitle">{t("dashboard.analytics")}</span>
@@ -436,7 +407,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── Pest Alerts ─────────────── */}
             {pestAlerts.length > 0 && (
                 <motion.div className="dashboard__explanation" variants={fadeUp}>
                     <span className="dashboard__explanationLabel">{t("dashboard.alerts")}</span>
@@ -448,7 +418,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── Profit Comparison Chart ──── */}
             {allCrops.length > 1 && (
                 <motion.div variants={fadeUp}>
                     <ProfitChart
@@ -458,7 +427,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── Alternative Crops ────────── */}
             {alts.length > 0 && (
                 <motion.div className="dashboard__alts" variants={fadeUp}>
                     <span className="dashboard__altsTitle">{t("dashboard.alternatives")}</span>
@@ -496,7 +464,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── Explanation ──────────────── */}
             {result.explanation && (
                 <motion.div className="dashboard__explanation" variants={fadeUp}>
                     <span className="dashboard__explanationLabel">{t("dashboard.explanation")}</span>
@@ -504,7 +471,6 @@ export default function Dashboard({ result }) {
                 </motion.div>
             )}
 
-            {/* ── History ─────────────────── */}
             {Array.isArray(result.history) && result.history.length > 0 && (
                 <motion.div className="dashboard__alts" variants={fadeUp}>
                     <span className="dashboard__altsTitle">{t("dashboard.history")}</span>

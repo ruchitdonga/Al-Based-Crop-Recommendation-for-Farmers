@@ -1,7 +1,6 @@
 import React from 'react';
 
 const AudioVisualizer = ({ isListening }) => {
-    // We'll create 5 bars for a simple, recognizable audio wave look
     const bars = Array.from({ length: 5 });
 
     return (

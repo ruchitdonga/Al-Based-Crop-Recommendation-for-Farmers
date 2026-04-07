@@ -6,11 +6,6 @@ export const LANGS = [
 ];
 
 export const DEFAULT_LANG = "en";
-
-/**
- * Translation keys are flat on purpose for simplicity.
- * Keep values short and UI-friendly.
- */
 export const translations = {
   en: {
     "nav.home": "Home",

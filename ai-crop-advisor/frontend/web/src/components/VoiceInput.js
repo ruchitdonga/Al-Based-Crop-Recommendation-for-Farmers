@@ -1,11 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-/**
- * VoiceInput (Chrome)
- * - Uses the Web Speech API (SpeechRecognition / webkitSpeechRecognition)
- * - Click mic to start listening; auto-stops when user stops speaking
- * - Writes recognized text into an input field
- */
 export default function VoiceInput({
   value,
   onChange,
@@ -28,8 +21,6 @@ export default function VoiceInput({
   }, []);
 
   const isSupported = Boolean(SpeechRecognitionCtor);
-
-  // Keep internal state in sync if parent controls `value`.
   useEffect(() => {
     if (typeof value === "string" && value !== text) {
       setText(value);
@@ -68,11 +59,9 @@ export default function VoiceInput({
     const rec = recognitionRef.current;
     if (rec) {
       try {
-        // abort() stops immediately; stop() tries to return a final result.
         if (typeof rec.abort === "function") rec.abort();
         else rec.stop();
       } catch {
-        // no-op
       }
     }
     setIsListening(false);
@@ -87,15 +76,11 @@ export default function VoiceInput({
     }
 
     if (disabled) return;
-
-    // Create a fresh instance each time to avoid weird state issues across starts.
     const rec = new SpeechRecognitionCtor();
     recognitionRef.current = rec;
 
     baseTextRef.current = String(inputTextRef.current ?? "").trim();
     finalTranscriptRef.current = "";
-
-    // Config: stop automatically when the user stops speaking.
     rec.continuous = false;
     rec.interimResults = true;
     rec.lang = "en-US";
@@ -115,7 +100,6 @@ export default function VoiceInput({
     };
 
     rec.onresult = (event) => {
-      // Build text as: base + final + interim (no duplication).
       let interim = "";
       let finalChunk = "";
 
@@ -137,12 +121,10 @@ export default function VoiceInput({
       emitChange(combined);
     };
 
-    // When user stops speaking, Chrome fires `speechend` then `end`.
     rec.onspeechend = () => {
       try {
         rec.stop();
       } catch {
-        // no-op
       }
     };
 
@@ -154,8 +136,6 @@ export default function VoiceInput({
       if (finalTranscriptRef.current.trim()) {
         emitChange(finalText);
       }
-
-      // If we ended without a transcript and without an error, show a gentle hint.
       if (!finalTranscriptRef.current.trim() && !error) {
         setError("No speech detected. Tap the mic and try again.");
       }
@@ -180,8 +160,6 @@ export default function VoiceInput({
       startListening();
     }
   };
-
-  // Cleanup on unmount.
   useEffect(() => {
     return () => {
       const rec = recognitionRef.current;
@@ -196,7 +174,6 @@ export default function VoiceInput({
           if (typeof rec.abort === "function") rec.abort();
           else rec.stop();
         } catch {
-          // no-op
         }
       }
       recognitionRef.current = null;

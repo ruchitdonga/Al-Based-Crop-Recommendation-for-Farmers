@@ -1,7 +1,4 @@
 function getDefaultApiBaseUrl() {
-  // Default to the deployed Hugging Face Spaces backend.
-  // Override in dev/prod with `REACT_APP_API_BASE_URL`.
-  // Example: `REACT_APP_API_BASE_URL=/api` when using a CRA proxy.
   return "https://ruchitd-ai-crop-backend.hf.space/api";
 }
 

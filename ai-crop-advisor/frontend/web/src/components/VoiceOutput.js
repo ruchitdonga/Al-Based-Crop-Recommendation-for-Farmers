@@ -1,11 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-/**
- * VoiceOutput (Chrome)
- * - Uses the browser SpeechSynthesis API
- * - Speak: cancels any existing speech, then speaks the latest text
- * - Stop: cancels and clears speaking state
- */
 export default function VoiceOutput({
   text,
   disabled = false,
@@ -32,7 +25,6 @@ export default function VoiceOutput({
     try {
       window.speechSynthesis.cancel();
     } catch {
-      // no-op
     }
 
     utteranceRef.current = null;
@@ -54,14 +46,9 @@ export default function VoiceOutput({
       setError("Nothing to speak.");
       return;
     }
-
-    // Handle multiple clicks properly:
-    // - Cancel anything currently speaking (or queued)
-    // - Speak the latest string immediately
     try {
       window.speechSynthesis.cancel();
     } catch {
-      // no-op
     }
 
     const utterance = new window.SpeechSynthesisUtterance(cleanedText);
@@ -96,14 +83,11 @@ export default function VoiceOutput({
       utteranceRef.current = null;
     }
   };
-
-  // Cleanup on unmount.
   useEffect(() => {
     return () => {
       try {
         window.speechSynthesis?.cancel?.();
       } catch {
-        // no-op
       }
       utteranceRef.current = null;
     };

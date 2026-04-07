@@ -18,7 +18,6 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, lang);
-    // Helps screen readers and browsers pick correct shaping.
     document.documentElement.lang = lang;
   }, [lang]);
 

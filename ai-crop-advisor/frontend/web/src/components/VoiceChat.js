@@ -58,7 +58,6 @@ export default function VoiceChat() {
     try {
       window.speechSynthesis.cancel();
     } catch {
-      // no-op
     }
 
     const utterance = new window.SpeechSynthesisUtterance(text);
@@ -72,7 +71,6 @@ export default function VoiceChat() {
     try {
       window.speechSynthesis.speak(utterance);
     } catch {
-      // no-op
     }
   };
 
@@ -122,7 +120,6 @@ export default function VoiceChat() {
       try {
         rec.stop();
       } catch {
-        // no-op
       }
     }
     setIsListening(false);
@@ -136,12 +133,10 @@ export default function VoiceChat() {
       return;
     }
 
-    // Cancel any ongoing speech so voice feels responsive.
     if (canSpeak) {
       try {
         window.speechSynthesis.cancel();
       } catch {
-        // no-op
       }
       setIsSpeaking(false);
     }
@@ -151,7 +146,7 @@ export default function VoiceChat() {
     const rec = new SpeechRecognitionCtor();
     recognitionRef.current = rec;
 
-    rec.continuous = false; // auto-stop when user stops speaking
+    rec.continuous = false;
     rec.interimResults = true;
     rec.lang = locale;
 
@@ -185,7 +180,6 @@ export default function VoiceChat() {
         .replace(/\s+/g, " ")
         .trim();
 
-      // Keep the input field live-updated.
       setInput(combined);
 
       if (finalText.trim()) {
@@ -199,7 +193,6 @@ export default function VoiceChat() {
       try {
         rec.stop();
       } catch {
-        // no-op
       }
     };
 
@@ -234,7 +227,6 @@ export default function VoiceChat() {
     if (!isLoading) sendUserMessage(input);
   };
 
-  // Keep the greeting aligned with active language.
   useEffect(() => {
     setMessages((prev) =>
       prev.map((m) =>
@@ -243,26 +235,22 @@ export default function VoiceChat() {
     );
   }, [lang, t]);
 
-  // Auto-scroll to latest message
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       try {
         recognitionRef.current?.stop?.();
       } catch {
-        // no-op
       }
 
       try {
         window.speechSynthesis?.cancel?.();
       } catch {
-        // no-op
       }
     };
   }, []);
