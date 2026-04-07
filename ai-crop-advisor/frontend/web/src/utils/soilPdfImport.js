@@ -33,7 +33,7 @@ export function extractSoilMetricsFromText(rawText) {
     const text = String(value)
       .replace(/\s+/g, " ")
       .trim()
-      .replace(/[,:;\-]+$/g, "")
+      .replace(/[,:;-]+$/g, "")
       .trim();
     return text ? text : null;
   };
