@@ -5,10 +5,13 @@ import { useLanguage } from "../i18n/LanguageContext";
 import Dashboard from "../components/Dashboard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import AudioVisualizer from "../components/AudioVisualizer";
+import { useDropzone } from "react-dropzone";
+import { CloudUpload } from "lucide-react";
+import * as pdfjsLib from "pdfjs-dist/webpack.mjs";
+import { extractSoilMetricsFromText, extractTextFromPdfFile } from "../utils/soilPdfImport";
 
 function CropForm() {
   const { lang, t } = useLanguage();
-  // Stores all form fields in a single object.
   const [formData, setFormData] = useState({
     N: "",
     P: "",
@@ -25,15 +28,18 @@ function CropForm() {
     last_crop: "",
   });
 
-  // UI state for submit lifecycle.
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  // Voice input state.
   const [isListening, setIsListening] = useState(false);
   const [recognizedText, setRecognizedText] = useState("");
   const [voiceError, setVoiceError] = useState("");
+
+  const [pdfImportError, setPdfImportError] = useState("");
+  const [pdfImportSuccess, setPdfImportSuccess] = useState(false);
+  const [isImportingPdf, setIsImportingPdf] = useState(false);
+  const [pdfImportedValues, setPdfImportedValues] = useState(null);
 
   const recognitionRef = useRef(null);
   const finalTranscriptRef = useRef("");
@@ -46,7 +52,6 @@ function CropForm() {
 
   const canRecognize = Boolean(SpeechRecognitionCtor);
 
-  // Keep a ref to the active timeout so we can clean up on unmount.
   const loadingTimerRef = useRef(null);
 
   useEffect(() => {
@@ -58,7 +63,6 @@ function CropForm() {
       try {
         recognitionRef.current?.stop?.();
       } catch {
-        // no-op
       }
     };
   }, []);
@@ -107,17 +111,69 @@ function CropForm() {
     []
   );
 
-  // Generic change handler for all inputs.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const importSoilDataFromPdf = async (file) => {
+    setPdfImportError("");
+    setPdfImportSuccess(false);
+    setPdfImportedValues(null);
+
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      setPdfImportError("Please upload a PDF file.");
+      return;
+    }
+
+    setIsImportingPdf(true);
+    try {
+      const extractedText = await extractTextFromPdfFile(file, pdfjsLib);
+      const metrics = extractSoilMetricsFromText(extractedText);
+
+      const updates = {};
+      if (metrics.N != null) updates.N = metrics.N;
+      if (metrics.P != null) updates.P = metrics.P;
+      if (metrics.K != null) updates.K = metrics.K;
+      if (metrics.ph != null) updates.ph = metrics.ph;
+      if (metrics.temperature != null) updates.temperature = metrics.temperature;
+      if (metrics.humidity != null) updates.humidity = metrics.humidity;
+      if (metrics.rainfall != null) updates.rainfall = metrics.rainfall;
+      if (metrics.pesticide != null) updates.pesticide = metrics.pesticide;
+      if (metrics.last_crop != null) updates.last_crop = metrics.last_crop;
+
+      if (Object.keys(updates).length === 0) {
+        setPdfImportError("Could not find any recognized fields in that PDF.");
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, ...updates }));
+      setPdfImportedValues(updates);
+      setPdfImportSuccess(true);
+    } catch {
+      setPdfImportError("Failed to read that PDF. Please try a different file.");
+    } finally {
+      setIsImportingPdf(false);
+    }
+  };
+
+  const onDrop = async (acceptedFiles) => {
+    const file = acceptedFiles?.[0];
+    await importSoilDataFromPdf(file);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: { "application/pdf": [".pdf"] },
+    disabled: isLoading || isImportingPdf,
+  });
+
   const applyVoiceToForm = (rawText) => {
     const original = String(rawText ?? "").trim();
     if (!original) return;
 
-    // Normalize a bit for common STT output (e.g. "6 point 8").
     const normalized = original
       .toLowerCase()
       .replace(/(\d)\s*point\s*(\d)/g, "$1.$2")
@@ -146,7 +202,6 @@ function CropForm() {
         if (value != null && value !== "") updates[key] = value;
       }
     } else {
-      // If no labels are present, fall back to sequential fill.
       const nums = normalized.match(/-?\d+(?:\.\d+)?/g) ?? [];
       const order = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph"];
       let idx = 0;
@@ -174,7 +229,6 @@ function CropForm() {
       try {
         rec.stop();
       } catch {
-        // no-op
       }
     }
     setIsListening(false);
@@ -188,7 +242,6 @@ function CropForm() {
       return;
     }
 
-    // Reset transcript buffers.
     finalTranscriptRef.current = "";
     setRecognizedText("");
 
@@ -238,7 +291,6 @@ function CropForm() {
       try {
         rec.stop();
       } catch {
-        // no-op
       }
     };
 
@@ -321,7 +373,6 @@ function CropForm() {
     });
   };
 
-  // Validation: backend requires full soil/climate numeric input.
   const validate = () => {
     const requiredNumeric = ["N", "P", "K", "temperature", "humidity", "rainfall", "ph", "area", "pesticide", "crop_year"];
 
@@ -348,7 +399,6 @@ function CropForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Prevent double submits while loading.
     if (isLoading) return;
 
     const validation = validate();
@@ -362,7 +412,6 @@ function CropForm() {
     setResult(null);
     setIsLoading(true);
 
-    // API call: POST /api/recommend/
     loadingTimerRef.current = setTimeout(async () => {
       try {
         const payload = {
@@ -449,6 +498,51 @@ function CropForm() {
             {t("form.subtitle")}
           </motion.p>
 
+          <motion.div className="pdfImport" variants={fadeUp}>
+            <div
+              {...getRootProps({
+                className: `pdfDropzone ${isDragActive ? "pdfDropzone--active" : ""} ${isImportingPdf ? "pdfDropzone--busy" : ""}`,
+              })}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload soil report PDF"
+            >
+              <input {...getInputProps()} />
+              <div className="pdfDropzone__inner">
+                <CloudUpload size={22} aria-hidden="true" />
+                <div className="pdfDropzone__text">
+                  <div className="pdfDropzone__title">
+                    {isImportingPdf
+                      ? "Importing PDF…"
+                      : isDragActive
+                        ? "Drop the PDF here…"
+                        : "Drag & drop soil report PDF here, or click to upload"}
+                  </div>
+                  <div className="pdfDropzone__hint">We’ll auto-fill N, P, K, pH (and other fields if present).</div>
+                </div>
+              </div>
+            </div>
+
+            {pdfImportSuccess ? (
+              <div className="pdfImport__success" role="status" aria-live="polite">
+                Soil Data Imported Successfully!
+                {pdfImportedValues ? (
+                  <span style={{ fontWeight: 600 }}>
+                    {" "}
+                    ({Object.entries(pdfImportedValues)
+                      .map(([k, v]) => `${k.toUpperCase()}: ${v}`)
+                      .join(", ")})
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            {pdfImportError ? (
+              <div className="pdfImport__error" role="alert" aria-live="polite">
+                {pdfImportError}
+              </div>
+            ) : null}
+          </motion.div>
+
           <motion.div className="voiceRow" variants={fadeUp}>
             <div className="voiceRow__actions">
               <button
@@ -526,8 +620,6 @@ function CropForm() {
                         inputMode="decimal"
                         disabled={isLoading}
                       />
-
-                      {/* Live Validation Feedback */}
                       <div className="field__validationIcon">
                         {formData[f.name] !== "" ? (
                           Number.isFinite(Number(formData[f.name])) ? (
